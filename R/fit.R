@@ -122,7 +122,7 @@ state_plot <- results_biden %>%
   labs(x = "vote share", y = NULL,
        title = "estimated vote share by state",
        subtitle = paste0("source: state polls via RCP as of ", Sys.Date())) +
-  theme(plot.title = element_text(size = 15, face = "bold"),
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
         plot.subtitle = element_text(size = 7),
         axis.text.y = element_text(size = 11))
 
@@ -168,7 +168,7 @@ ec_plot <- data_frame(
   labs(x = "electoral college votes", y = NULL, fill = NULL,
        title = "distribution of electoral college votes") +
   theme(legend.position = "bottom",
-        plot.title = element_text(size = 15, face = "bold"),
+        plot.title = element_text(size = 15, face = "bold", hjust = .5),
         plot.subtitle = element_text(size = 8),
         panel.grid = element_blank(),
         axis.text.y = element_blank(),
