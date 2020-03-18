@@ -126,7 +126,7 @@ state_plot <- results_biden %>%
         plot.subtitle = element_text(size = 7),
         axis.text.y = element_text(size = 9))
 
-ggsave("results/state_distributions.png", state_plot, height = 10)
+ggsave("results/state_distributions.png", state_plot, height = 9)
 
 # P-win --------------------------------------------------------------------
 
@@ -134,7 +134,7 @@ ggsave("results/state_distributions.png", state_plot, height = 10)
 p_biden <- round(apply(em$theta, 2, function(x) mean(x[, 2] > x[, 1])), 3)
 names(p_biden) <- state
 
-write.csv(p_biden, "results/p_biden.csv", row.names = F)
+write.csv(data.frame(p_biden), "results/p_biden.csv", row.names = F)
 
 
 
