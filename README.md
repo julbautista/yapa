@@ -10,12 +10,12 @@ Results
 
 ``` r
 # Fit model and produce results
-source("R/fit.R")
+#source("R/fit.R")
 ```
 
-<center>
-<img src="results/state_distributions.png" width="700" />
+<p align="center">
+<img width="600" height="900" src="results/state_distributions.png">
 
-<img src="results/ec_distributions.png" width="600" />
+<img width="600" height="500" src="results/ec_distributions.png">
 
-</center>
+</p>
