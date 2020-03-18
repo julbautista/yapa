@@ -124,9 +124,9 @@ state_plot <- results_biden %>%
        subtitle = paste0("source: state polls via RCP as of ", Sys.Date())) +
   theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
         plot.subtitle = element_text(size = 7),
-        axis.text.y = element_text(size = 11))
+        axis.text.y = element_text(size = 9))
 
-ggsave("results/state_distributions.png", state_plot)
+ggsave("results/state_distributions.png", state_plot, height = 10)
 
 # P-win --------------------------------------------------------------------
 
