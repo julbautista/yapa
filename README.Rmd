@@ -1,5 +1,8 @@
+---
+output: github_document
+---
 
-``` r
+```{r some code, message = FALSE, warning = FALSE, fig.height = 8, fig.align = 'center'}
 library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
@@ -127,73 +130,19 @@ results_biden %>%
   theme(plot.title = element_text(size = 15, face = "bold"),
         plot.subtitle = element_text(size = 7),
         axis.text.y = element_text(size = 11))
-```
 
-<img src="README_files/figure-markdown_github/some code-1.png" style="display: block; margin: auto;" />
-
-``` r
 # P-win --------------------------------------------------------------------
 
 # Probability of winning the state
 p_biden <- round(apply(em$theta, 2, function(x) mean(x[, 2] > x[, 1])), 3)
 names(p_biden) <- state
 data.frame(p_biden)
+
 ```
 
-    ##                      p_biden
-    ## Alabama                0.197
-    ## Alaska                 0.298
-    ## Arizona                0.471
-    ## Arkansas               0.174
-    ## California             0.996
-    ## Colorado               0.555
-    ## Connecticut            0.812
-    ## Delaware               0.828
-    ## District of Columbia   0.997
-    ## Florida                0.496
-    ## Georgia                0.592
-    ## Hawaii                 0.866
-    ## Idaho                  0.128
-    ## Illinois               0.727
-    ## Indiana                0.261
-    ## Iowa                   0.552
-    ## Kansas                 0.184
-    ## Kentucky               0.069
-    ## Louisiana              0.246
-    ## Maine                  0.524
-    ## Maryland               0.825
-    ## Massachusetts          0.935
-    ## Michigan               0.913
-    ## Minnesota              0.516
-    ## Mississippi            0.294
-    ## Missouri               0.254
-    ## Montana                0.238
-    ## Nebraska               0.182
-    ## Nevada                 0.522
-    ## New Hampshire          0.726
-    ## New Jersey             0.669
-    ## New Mexico             0.780
-    ## New York               0.857
-    ## North Carolina         0.576
-    ## North Dakota           0.104
-    ## Ohio                   0.566
-    ## Oklahoma               0.096
-    ## Oregon                 0.649
-    ## Pennsylvania           0.810
-    ## Rhode Island           0.682
-    ## South Carolina         0.187
-    ## South Dakota           0.140
-    ## Tennessee              0.214
-    ## Texas                  0.372
-    ## Utah                   0.274
-    ## Vermont                0.815
-    ## Virginia               0.544
-    ## Washington             0.813
-    ## West Virginia          0.070
-    ## Wisconsin              0.588
-    ## Wyoming                0.062
 
-``` r
+
+```{r sim, message = F, warning = F}
 # Simulate 4000 elections
 er <- matrix(0, nrow = dim(em$theta)[1], ncol = dim(em$theta)[3])
 
@@ -209,11 +158,8 @@ for(i in 1:dim(em$theta)[1]) {
 
 # Prob biden wins
 mean(er[, 2] > er[, 1])
-```
 
-    ## [1] 0.87825
 
-``` r
 data_frame(
   electoral_votes = c(er[, 1], er[, 2]),
   candidate = c(rep("Trump", nrow(er)), rep("Biden", nrow(er)))
@@ -232,6 +178,6 @@ data_frame(
         plot.subtitle = element_text(size = 8),
         panel.grid = element_blank(),
         axis.text.y = element_blank())
-```
 
-![](README_files/figure-markdown_github/sim-1.png)
+
+```
