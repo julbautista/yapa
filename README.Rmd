@@ -17,8 +17,8 @@ source("R/fit.R")
 
 <center> 
 
-![](results/state_distributions.png){height=500px, width=700px}
+![](results/state_distributions.png){height=800px, width=700px}
 
-![](results/ec_distributions.png){height=500px, width=500px}
+![](results/ec_distributions.png){height=600px, width=600px}
 
 </center>
