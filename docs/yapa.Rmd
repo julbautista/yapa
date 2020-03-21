@@ -1,5 +1,5 @@
 ---
-title: "Yet Another Poll Aggregator Methodology"
+title: "Methodology"
 author: "Alex Pavlakis"
 output: 
   html_document:
@@ -29,7 +29,7 @@ In this model, we use the results of the previous presidential election in each 
 
 ## Assumptions
 
-1. polls are unbiased _on average_ (unrealistic).
+1. Polls are unbiased _on average_ (unrealistic).
 2. There is no time-trend in the true underlying support for each candidate in each state, just different realizations from a distribution (unrealistic).
-3. state general election results are unlikely to deviate more than 20 percentage points from their results in the previous general election.
+3. State general election results are unlikely to deviate more than 20 percentage points from their results in the previous general election.
 
