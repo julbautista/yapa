@@ -1,6 +1,10 @@
-name: "2020-proj"
+name: "2020-project"
+output_dir: "docs"
 navbar:
   title: " "
   left:
-    - text: "Home"
-      href: index.html
+  - text: "Home"
+   href: index.html
+output:
+  html_document:
+ theme: cosmo
