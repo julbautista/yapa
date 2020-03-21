@@ -18,6 +18,8 @@ state_results <- fread("../results/state_results.csv")
 state_simulations <- fread("../results/state_simulations.csv")
 p_biden <- fread("../results/p_biden.csv")
 er <- fread("../results/electoral_college_sims.csv")
+results_biden <- fread("../results/results_biden.csv")
+results_trump <- fread("../results/results_trump.csv")
 
 ```
 
@@ -33,8 +35,29 @@ Biden is forcase to win between `r biden[1]` and `r biden[2]` electoral college 
 
 <p align="center">
 
-<img src="ec_distributions.png">
+```{r ecplot, results = T}
+data_frame(
+  electoral_votes = c(er$V1, er$V2),
+  candidate = c(rep("Trump", nrow(er)), rep("Biden", nrow(er)))
+) %>% 
+  ggplot() +
+  aes(x = electoral_votes, fill = candidate, y = ..density..) +
+  geom_histogram(alpha = 0.7, bins = 60,
+                 position = "identity") +
+  scale_x_continuous(limits = c(0, 538),
+                     breaks = c(seq(0, 538, 100), 270)) +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme_minimal() +
+  labs(x = "electoral college votes", y = NULL, fill = NULL,
+       title = "distribution of electoral college votes") +
+  theme(legend.position = "bottom",
+        plot.title = element_text(size = 15, face = "bold", hjust = .5),
+        plot.subtitle = element_text(size = 8),
+        panel.grid = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 11))
 
+```
 </p>
 
 
@@ -66,7 +89,31 @@ Note that uncertainties at this time are due to a) close races and/or b) limited
 
 <p align="center">
 
-<img src="state_distributions.png">
+```{r stateplot, results = T}
+results_biden %>%
+  ggplot() +
+  aes(x = mean, y = reorder(state, mean),
+      xmin = lower, xmax = upper) +
+  geom_point(col = "blue") +
+  geom_errorbarh(height = 0, col = "blue") +
+  geom_point(data = results_trump, 
+             aes(x = mean, y = state,
+                 xmin = lower, xmax = upper),
+             col = "red") +
+  geom_errorbarh(data = results_trump,
+                 aes(x = mean, y = state,
+                     xmin = lower, xmax = upper), 
+                 height = 0, col = "red") +
+  theme_minimal() +
+  scale_x_continuous(breaks = seq(0, 1, 0.25),
+                     labels = paste0(seq(0, 100, 25), "%")) +
+  labs(x = "vote share", y = NULL,
+       title = "estimated vote share by state",
+       subtitle = paste0("source: state polls via RCP as of ", Sys.Date())) +
+  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(size = 7),
+        axis.text.y = element_text(size = 9))
+```
 
 </p>
 
