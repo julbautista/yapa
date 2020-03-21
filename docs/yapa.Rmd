@@ -1,5 +1,5 @@
 ---
-title: "Yet Another Poll Aggregator"
+title: "Yet Another Poll Aggregator Methodology"
 author: "Alex Pavlakis"
 output: 
   html_document:
@@ -11,7 +11,6 @@ output:
 knitr::opts_chunk$set(echo = TRUE, warning = F, message = F, cache = T)
 ```
 
-# yapa
 
 Yapa is a simple poll aggregator designed to simulate state-level results in US presidential elections by combining data from state level polls with prior information from previous presidential election results.
 
@@ -35,14 +34,3 @@ In this model, we use the results of the previous presidential election in each 
 2. There is no time-trend in the true underlying support for each candidate in each state, just different realizations from a distribution (unrealistic).
 3. state general election results are unlikely to deviate more than 20 percentage points from their results in the previous general election.
 
-
-# Results
-
-<p align="center">
-
-<img src="results/state_distributions.png">
-
-<img src="results/ec_distributions.png">
-
-
-</p>
