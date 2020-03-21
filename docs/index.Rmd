@@ -87,9 +87,8 @@ The outcomes in the following states are uncertain at this time: `r paste(tossup
 
 Note that uncertainties at this time are due to a) close races and/or b) limited polling data.  As more polls become available and election day nears, the outcome of some states marked uncertain will become clearer.
 
-<p align="center">
 
-```{r stateplot, results = T}
+```{r stateplot, results = T, fig.height = 8, fig.align = 'center'}
 results_biden %>%
   ggplot() +
   aes(x = mean, y = reorder(state, mean),
@@ -114,8 +113,6 @@ results_biden %>%
         plot.subtitle = element_text(size = 7),
         axis.text.y = element_text(size = 9))
 ```
-
-</p>
 
 
 ```{r table}
