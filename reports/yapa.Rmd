@@ -1,0 +1,48 @@
+---
+title: "Yet Another Poll Aggregator"
+author: "Alex Pavlakis"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F, cache = T)
+```
+
+# yapa
+
+Yapa is a simple poll aggregator designed to simulate state-level results in US presidential elections by combining data from state level polls with prior information from previous presidential election results.
+
+# Model
+
+The number of respondents in each poll $p$ in state $s$ who support each candidate $c$ ($y_{s(p), c(p)}$) is sampled from a binomial distribution of the total respondents in than poll $n_p$ with rate paramter specific to the candidate and the state $\theta_{s(p), c(p)}$.  That rate parameter is drawn from a prior distribution with candidate-state specific mean $\alpha_{c, s}$ and state specific variance $t_s$.  The sum of proportions for each candidate must equal one.
+
+$$
+\begin{align}
+y_{s(p), c(p)} &\sim Binomial(n_p, \theta_{s(p), c(p)}) \\
+\theta_{s, c} &\sim Normal(\alpha_{s, c}, \tau_{s}) \\
+\sum_c \theta_s &= 1 
+\end{align}
+$$
+
+In this model, we use the results of the previous presidential election in each state as prior $\alpha$.
+
+## Assumptions
+
+1. polls are unbiased _on average_ (unrealistic).
+2. There is no time-trend in the true underlying support for each candidate in each state, just different realizations from a distribution (unrealistic).
+3. state general election results are unlikely to deviate more than 20 percentage points from their results in the previous general election.
+
+
+# Results
+
+<p align="center">
+
+<img src="results/state_distributions.png">
+
+<img src="results/ec_distributions.png">
+
+
+</p>

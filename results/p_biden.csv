@@ -1,52 +1,52 @@
-"p_biden"
-0.217
-0.315
-0.473
-0.177
-0.997
-0.546
-0.798
-0.819
-0.998
-0.484
-0.587
-0.856
-0.136
-0.721
-0.257
-0.532
-0.205
-0.067
-0.252
-0.512
-0.826
-0.927
-0.928
-0.53
-0.287
-0.25
-0.236
-0.196
-0.521
-0.718
-0.678
-0.769
-0.856
-0.551
-0.105
-0.564
-0.102
-0.669
-0.804
-0.685
-0.187
-0.154
-0.221
-0.377
-0.274
-0.809
-0.548
-0.815
-0.073
-0.581
-0.065
+"state","p_biden"
+"Alabama",0.217
+"Alaska",0.315
+"Arizona",0.473
+"Arkansas",0.177
+"California",0.997
+"Colorado",0.546
+"Connecticut",0.798
+"Delaware",0.819
+"District of Columbia",0.998
+"Florida",0.484
+"Georgia",0.587
+"Hawaii",0.856
+"Idaho",0.136
+"Illinois",0.721
+"Indiana",0.257
+"Iowa",0.532
+"Kansas",0.205
+"Kentucky",0.067
+"Louisiana",0.252
+"Maine",0.512
+"Maryland",0.826
+"Massachusetts",0.927
+"Michigan",0.928
+"Minnesota",0.53
+"Mississippi",0.287
+"Missouri",0.25
+"Montana",0.236
+"Nebraska",0.196
+"Nevada",0.521
+"New Hampshire",0.718
+"New Jersey",0.678
+"New Mexico",0.769
+"New York",0.856
+"North Carolina",0.551
+"North Dakota",0.105
+"Ohio",0.564
+"Oklahoma",0.102
+"Oregon",0.669
+"Pennsylvania",0.804
+"Rhode Island",0.685
+"South Carolina",0.187
+"South Dakota",0.154
+"Tennessee",0.221
+"Texas",0.377
+"Utah",0.274
+"Vermont",0.809
+"Virginia",0.548
+"Washington",0.815
+"West Virginia",0.073
+"Wisconsin",0.581
+"Wyoming",0.065
