@@ -4,25 +4,11 @@ author: "Alex Pavlakis"
 output: 
   html_document:
     theme: cerulean
-    code_folding: hide
 ---
 
 
-<style>
-.table-fixed-header tbody{
-  display:block;
-  overflow:auto;
-  height:400px;
-  width:100%;
-}
-.table-fixed-header thead tr{
-  display:table-header-group;
-  height:100%;
-}
-</style>
-
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = F, message = F, cache = F)
+knitr::opts_chunk$set(echo = FALSE, warning = F, message = F, cache = F)
 ```
 
 
@@ -94,7 +80,7 @@ DT::datatable(state_results, options = list(scrollX = TRUE,
 
 ## State detail
 
-```{r state-detail, echo = TRUE}
+```{r state-detail, results = TRUE}
 library(tidyverse)
 for(s in sort(state_results$State)) {
   print(

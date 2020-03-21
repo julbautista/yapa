@@ -4,11 +4,10 @@ author: "Alex Pavlakis"
 output: 
   html_document:
     theme: cerulean
-    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = F, message = F, cache = T)
+knitr::opts_chunk$set(echo = FALSE, warning = F, message = F, cache = T)
 ```
 
 

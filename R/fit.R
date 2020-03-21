@@ -114,7 +114,7 @@ state_results <- results_biden %>%
                      `Mean Trump`  = mean) %>%
               select(-cand)) %>%
   rename(State = state) %>%
-  arrange(`Mean Biden`) %>%
+  arrange(-`Mean Biden`) %>%
   mutate_if(is.numeric, function(x) paste0(round(x*100), "%"))
 
 data.table::fwrite(state_results, "results/state_results.csv")
@@ -176,6 +176,7 @@ for(i in 1:dim(em$theta)[1]) {
     }
   }
 }
+data.table::fwrite(er, "results/electoral_college_sims.csv")
 
 # Plot
 ec_plot <- data_frame(
@@ -200,6 +201,7 @@ ec_plot <- data_frame(
         axis.text.x = element_text(size = 11))
 
 ggsave("results/ec_distributions.png", ec_plot)
+
 
 
 
