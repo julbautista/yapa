@@ -78,7 +78,7 @@ server <- function(input, output) {
   output$ec_distribution <- renderImage({
     
     # Return a list containing the filename
-    list(src = "results/ec_distributions.png",
+    list(src = "docs/ec_distributions.png",
          contentType = 'image/png',
          width = 815,
          height = 500,
@@ -88,7 +88,7 @@ server <- function(input, output) {
   output$state_vote_share <- renderImage({
     
     # Return a list containing the filename
-    list(src = "results/state_distributions.png",
+    list(src = "docs/state_distributions.png",
          contentType = 'image/png',
          width = 840,
          height = 800,

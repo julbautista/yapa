@@ -4,11 +4,14 @@ author: "Alex Pavlakis"
 output: 
   html_document:
     theme: cerulean
+    toc: true
+    toc_float: true
+    toc_depth: 4
 ---
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = F, message = F, cache = F)
+knitr::opts_chunk$set(echo = FALSE, warning = F, message = F, cache = F, fig.align = 'center')
 ```
 
 
@@ -30,10 +33,9 @@ biden <- round(quantile(er$V2, c(0.05, 0.95)))
 trump <- round(quantile(er$V1, c(0.05, 0.95)))
 ```
 
-Biden is forcase to win between `r biden[1]` and `r biden[2]` electoral college votes.  Trump is forecast to win between `r trump[1]` and `r trump[2]` electoral college votes (95% uncertainty interval).
+Biden is projected to win between `r biden[1]` and `r biden[2]` electoral college votes.  Trump is projected to win between `r trump[1]` and `r trump[2]` electoral college votes (90% uncertainty interval).
 
 
-<p align="center">
 
 ```{r ecplot, results = T}
 data_frame(
@@ -58,14 +60,13 @@ data_frame(
         axis.text.x = element_text(size = 11))
 
 ```
-</p>
 
 
 # States
 
 ```{r stateresults}
 biden_likely_winner <- p_biden[p_biden >= 0.9, state]
-biden_favored <- p_biden[p_biden > 0.6 & p_biden < 0.9, state]
+biden_favored <- p_biden[p_biden > 0.7 & p_biden < 0.9, state]
 
 trump_likely_winner <- p_biden[p_biden < 0.1, state]
 trump_favored <- p_biden[p_biden > 0.1 & p_biden < 0.3, state]
@@ -85,7 +86,7 @@ Trump is favored to win: `r paste(trump_favored, collapse = ", ")`
 
 The outcomes in the following states are uncertain at this time: `r paste(tossup, collapse = ", ")`
 
-Note that uncertainties at this time are due to a) close races and/or b) limited polling data.  As more polls become available and election day nears, the outcome of some states marked uncertain will become clearer.
+Note that uncertainties at this time are due to a) close races and/or b) few polls  As more polls become available and election day nears, the outcome of some states marked uncertain will become clearer.
 
 
 ```{r stateplot, results = T, fig.height = 8, fig.align = 'center'}

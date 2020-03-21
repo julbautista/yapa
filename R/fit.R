@@ -16,12 +16,10 @@ source("data/rcpp_links.R")
 source("R/process_polls.R")
 polls_data <- vector('list', length(rcpp_links))
 for(i in 1:length(rcpp_links)) {
-  polls_data[[i]] <- process_rcp(rcpp_links[[i]], n = Inf,
-                                 wt_function = function(x) exp(-x/60)) %>%
+  polls_data[[i]] <- process_rcp(rcpp_links[[i]], n = 10) %>%
     mutate(state = names(rcpp_links)[i])
 }
 polls <- bind_rows(polls_data) %>%
-  select(-end_date) %>%
   arrange(state)
 
 # Vector of state names (51 = all states + DC)
@@ -32,13 +30,9 @@ state <- prior_results$state
 
 # Model data --------------------------------------------------------------
 
-# Weighted sample for each poll
-n <- polls %>%
-  pull(Sample)
-
-# Weighted counts for each option in each poll
+# Counts for each option in each poll
 y <- polls %>%
-  select(-state, -Sample) %>%
+  select(-state, -Sample, -days_out) %>%
   as.matrix()
 
 # Number of polls
@@ -58,14 +52,18 @@ n_states <- n_distinct(polls$state)
 # Number of candidates
 n_options <- ncol(y)
 
+# Days out from election (for weighting)
+days_out <- polls$days_out
+
 # Combine into list
 model_data <- list(n_options = n_options, 
                    n_states = n_states, 
                    N = N,
-                   n = n,
                    y = y,
                    state_id = state_id,
-                   priors = priors)
+                   priors = priors,
+                   days_out = days_out,
+                   decay_param = 60)
 
 
 
@@ -73,7 +71,7 @@ model_data <- list(n_options = n_options,
 # Fit model ---------------------------------------------------------------
 
 m <- stan(file = "stan/yapa_states.stan", data = model_data,
-          chains = 4, iter = 2000)
+          chains = 4, iter = 4000)
 
 em <- rstan::extract(m)
 
@@ -102,7 +100,11 @@ results_trump <- data_frame(
   upper = quantiles_trump[2, ],
   cand  = 'trump')
 
-# Table
+# Save
+data.table::fwrite(results_biden, "results/results_biden.csv")
+data.table::fwrite(results_trump, "results/results_trump.csv")
+
+# Formatted Table
 state_results <- results_biden %>%
   rename(`Lower Biden` = lower,
          `Upper Biden` = upper,
@@ -145,7 +147,7 @@ state_plot <- results_biden %>%
         plot.subtitle = element_text(size = 7),
         axis.text.y = element_text(size = 9))
 
-ggsave("results/state_distributions.png", state_plot, height = 9)
+ggsave("docs/state_distributions.png", state_plot, height = 9)
 
 
 
@@ -200,7 +202,7 @@ ec_plot <- data_frame(
         axis.text.y = element_blank(),
         axis.text.x = element_text(size = 11))
 
-ggsave("results/ec_distributions.png", ec_plot)
+ggsave("docs/ec_distributions.png", ec_plot)
 
 
 
@@ -209,8 +211,8 @@ ggsave("results/ec_distributions.png", ec_plot)
 
 simulations <- data_frame(
   value = c(c(em$theta[, , 1]), c(em$theta[, , 2]), c(em$theta[, , 3])),
-  state = rep(rep(state,  each = 4000), times = 3),
-  candidate = rep(c("Trump", "Biden", "Other"), each = 4000*51)
+  state = rep(rep(state,  each = dim(em$theta)[1]), times = 3),
+  candidate = rep(c("Trump", "Biden", "Other"), each = dim(em$theta)[1]*51)
 ) %>%
   group_by(state, candidate) %>%
   mutate(mean = mean(value)) %>%

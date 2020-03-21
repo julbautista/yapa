@@ -15,14 +15,12 @@ date_diff <- function(t1, t2) {
 ## site: character string to web address of rcp site;
 ## election day: character string of election day, used for weighting polls;
 ## wt_function: function for weighting polls.  Default is 1/sqrt(days from election).
-process_rcp <- function(site, election_day = "2020-11-06",
-                        wt_function = function(days_out) 1/sqrt(days_out),
-                        n = Inf) {
+process_rcp <- function(site, election_day = "2020-11-06", n = Inf) {
   
   # If site is NULL, assume there is no data
   if(is.null(site)) {
     polls <- data_frame(
-      Sample = 0, `Biden (D)` = 0, `Trump (R)` = 0, Other = 0
+      Sample = 0, `Biden (D)` = 0, `Trump (R)` = 0, Other = 0, days_out = 365
     )
   } else {
     
@@ -42,9 +40,7 @@ process_rcp <- function(site, election_day = "2020-11-06",
                                 end_date)) %>%
       mutate_if(is.character, function(x) gsub("--", "0", x)) %>%
       mutate(days_out = date_diff(election_day, end_date)) %>%
-      mutate(wt = wt_function(days_out),
-             Sample = round(Sample*wt)) %>%
-      select(-Poll, -Date, -Spread, -days_out, -wt) %>%
+      select(-Poll, -Date, -Spread, -end_date) %>%
       mutate_if(is.character, as.numeric)  %>%
       na.omit() %>%
       filter(Sample < Inf) %>%
@@ -55,10 +51,10 @@ process_rcp <- function(site, election_day = "2020-11-06",
     
     # Process raw data into weighted counts.  Account for "other"
     polls <- raw_data 
-    for(n in names(polls)[!names(polls) %in% c("Sample", "end_date")]) {
+    for(n in names(polls)[!names(polls) %in% c("Sample", "days_out")]) {
       polls[, n] <- round(polls[, 1]*polls[, n]/100)
     }
-    polls$Other <- polls$Sample - apply(polls[!names(polls) %in% c("Sample", "end_date")], 1, sum)
+    polls$Other <- polls$Sample - apply(polls[!names(polls) %in% c("Sample", "days_out")], 1, sum)
     polls$Other <- if_else(polls$Other < 0, 0, polls$Other)
   }
   
