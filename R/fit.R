@@ -4,7 +4,7 @@ options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
 
 
-# DATA --------------------------------------------------------------------
+# Data --------------------------------------------------------------------
 
 # Results from 2016 (priors) and electoral college votes by state
 prior_results <- read_csv("data/state_results_16.csv")
@@ -16,7 +16,8 @@ source("data/rcpp_links.R")
 source("R/process_polls.R")
 polls_data <- vector('list', length(rcpp_links))
 for(i in 1:length(rcpp_links)) {
-  polls_data[[i]] <- process_rcp(rcpp_links[[i]],  wt_function = function(x) 1/x) %>%
+  polls_data[[i]] <- process_rcp(rcpp_links[[i]], n = Inf,
+                                 wt_function = function(x) exp(-x/60)) %>%
     mutate(state = names(rcpp_links)[i])
 }
 polls <- bind_rows(polls_data) %>%
@@ -29,7 +30,7 @@ state <- prior_results$state
 
 
 
-# MODEL DATA --------------------------------------------------------------
+# Model data --------------------------------------------------------------
 
 # Weighted sample for each poll
 n <- polls %>%
@@ -101,6 +102,24 @@ results_trump <- data_frame(
   upper = quantiles_trump[2, ],
   cand  = 'trump')
 
+# Table
+state_results <- results_biden %>%
+  rename(`Lower Biden` = lower,
+         `Upper Biden` = upper,
+         `Mean Biden`  = mean) %>%
+  select(-cand) %>%
+  left_join(results_trump %>%
+              rename(`Lower Trump` = lower,
+                     `Upper Trump` = upper,
+                     `Mean Trump`  = mean) %>%
+              select(-cand)) %>%
+  rename(State = state) %>%
+  arrange(`Mean Biden`) %>%
+  mutate_if(is.numeric, function(x) paste0(round(x*100), "%"))
+
+data.table::fwrite(state_results, "results/state_results.csv")
+
+
 # Plot
 state_plot <- results_biden %>%
   ggplot() +
@@ -128,20 +147,26 @@ state_plot <- results_biden %>%
 
 ggsave("results/state_distributions.png", state_plot, height = 9)
 
+
+
 # P-win --------------------------------------------------------------------
 
 # Probability of winning the state
 p_biden <- round(apply(em$theta, 2, function(x) mean(x[, 2] > x[, 1])), 3)
 names(p_biden) <- state
 
-write.csv(data.frame(p_biden), "results/p_biden.csv", row.names = F)
+write.csv(data.frame(p_biden) %>%
+            tibble::rownames_to_column("state"),
+          "results/p_biden.csv", row.names = F)
 
 
 
-# Simulate
+
+# Simulate electoral college ----------------------------------------------
+
 er <- matrix(0, nrow = dim(em$theta)[1], ncol = dim(em$theta)[3])
 
-# Simulate some elections and their results
+# Simulate elections and results
 for(i in 1:dim(em$theta)[1]) {
   for(s in 1:dim(em$theta)[2]) {
     for(o in 1:dim(em$theta)[3]) {
@@ -152,14 +177,14 @@ for(i in 1:dim(em$theta)[1]) {
   }
 }
 
-
+# Plot
 ec_plot <- data_frame(
   electoral_votes = c(er[, 1], er[, 2]),
   candidate = c(rep("Trump", nrow(er)), rep("Biden", nrow(er)))
 ) %>% 
   ggplot() +
   aes(x = electoral_votes, fill = candidate, y = ..density..) +
-  geom_histogram(alpha = 0.75, bins = 60,
+  geom_histogram(alpha = 0.7, bins = 60,
                  position = "identity") +
   scale_x_continuous(limits = c(0, 538),
                      breaks = c(seq(0, 538, 100), 270)) +
@@ -175,4 +200,23 @@ ec_plot <- data_frame(
         axis.text.x = element_text(size = 11))
 
 ggsave("results/ec_distributions.png", ec_plot)
+
+
+
+# State simulations -------------------------------------------------------
+
+simulations <- data_frame(
+  value = c(c(em$theta[, , 1]), c(em$theta[, , 2]), c(em$theta[, , 3])),
+  state = rep(rep(state,  each = 4000), times = 3),
+  candidate = rep(c("Trump", "Biden", "Other"), each = 4000*51)
+) %>%
+  group_by(state, candidate) %>%
+  mutate(mean = mean(value)) %>%
+  ungroup() %>%
+  arrange(state)
+
+data.table::fwrite(simulations, "results/state_simulations.csv", row.names = F)
+
+
+
 

@@ -11,17 +11,17 @@ data {
   matrix<lower = 0, upper = 1>[n_states, n_options] priors; // prior rates
 }
 parameters {
-  simplex[n_options] theta[n_states]; // Simplex of simulated election proportions
-  real<lower = 0> tau[n_states];      // Variance in proportions
+  simplex[n_options] theta[n_states]; // simplex of simulated election proportions
+  real<lower = 0> tau[n_states];      // variance in proportions
 }
 model {
-  for(i in 1:N) {
-    for(o in 1:n_options) {
-      y[i, o] ~ binomial(n[i], theta[state_id[i]][o]);  // Binomial model
+  for(o in 1:n_options) {
+    for(i in 1:N) {
+      y[i, o] ~ binomial(n[i], theta[state_id[i]][o]);  // binomial model
     }
   }
-  for(s in 1:n_states) {
-    for(o in 1:n_options) {
+  for(o in 1:n_options) {
+    for(s in 1:n_states) {
       theta[s][o] ~ normal(priors[s, o], tau[s]); // prior on proportion
     }
   }
