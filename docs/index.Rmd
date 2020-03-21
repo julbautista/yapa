@@ -33,7 +33,7 @@ Biden is forcase to win between `r biden[1]` and `r biden[2]` electoral college 
 
 <p align="center">
 
-<img src="/results/ec_distributions.png">
+<img src="ec_distributions.png">
 
 </p>
 
@@ -66,7 +66,7 @@ Note that uncertainties at this time are due to a) close races and/or b) limited
 
 <p align="center">
 
-<img src="/results/state_distributions.png">
+<img src="state_distributions.png">
 
 </p>
 
