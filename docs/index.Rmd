@@ -16,39 +16,39 @@ knitr::opts_chunk$set(echo = FALSE, warning = F, message = F, cache = F, fig.ali
 
 
 ```{r data}
-library(data.table)
-state_results <- fread("../results/state_results.csv")
-state_simulations <- fread("../results/state_simulations.csv")
-p_biden <- fread("../results/p_biden.csv")
-er <- fread("../results/electoral_college_sims.csv")
-results_biden <- fread("../results/results_biden.csv")
-results_trump <- fread("../results/results_trump.csv")
-
+library(tidyverse)
+load("../results/state_results")
+load("../results/state_simulations")
+load("../results/p_biden")
+load("../results/ec_sims")
+load("../results/results_biden")
+load("../results/results_trump")
 ```
 
 # Topline
 
 ```{r topline-ec}
-biden <- round(quantile(er$V2, c(0.05, 0.95)))
-trump <- round(quantile(er$V1, c(0.05, 0.95)))
+biden <- round(quantile(ec_sims[, 2], c(0.05, 0.95)))
+trump <- round(quantile(ec_sims[, 1], c(0.05, 0.95)))
 ```
 
 Biden is projected to win between `r biden[1]` and `r biden[2]` electoral college votes.  Trump is projected to win between `r trump[1]` and `r trump[2]` electoral college votes (90% uncertainty interval).
 
 
 
-```{r ecplot, results = T}
+```{r ecplot, results = T, fig.width = 10}
 data_frame(
-  electoral_votes = c(er$V1, er$V2),
-  candidate = c(rep("Trump", nrow(er)), rep("Biden", nrow(er)))
+  electoral_votes = c(ec_sims[, 1], ec_sims[, 2]),
+  candidate = c(rep("Trump", nrow(ec_sims)), rep("Biden", nrow(ec_sims)))
 ) %>% 
   ggplot() +
   aes(x = electoral_votes, fill = candidate, y = ..density..) +
-  geom_histogram(alpha = 0.7, bins = 60,
+  geom_histogram(alpha = 0.7, bins = 538,
                  position = "identity") +
   scale_x_continuous(limits = c(0, 538),
                      breaks = c(seq(0, 538, 100), 270)) +
   scale_fill_manual(values = c("blue", "red")) +
+  geom_vline(xintercept = 270, lty = 2, col = "black") +
   theme_minimal() +
   labs(x = "electoral college votes", y = NULL, fill = NULL,
        title = "distribution of electoral college votes") +
@@ -65,13 +65,13 @@ data_frame(
 # States
 
 ```{r stateresults}
-biden_likely_winner <- p_biden[p_biden >= 0.9, state]
-biden_favored <- p_biden[p_biden > 0.7 & p_biden < 0.9, state]
+biden_likely_winner <- p_biden$state[p_biden$p_biden >= 0.9]
+biden_favored <- p_biden$state[p_biden$p_biden > 0.7 & p_biden$p_biden < 0.9]
 
-trump_likely_winner <- p_biden[p_biden < 0.1, state]
-trump_favored <- p_biden[p_biden > 0.1 & p_biden < 0.3, state]
+trump_likely_winner <- p_biden$state[p_biden$p_biden < 0.1]
+trump_favored <- p_biden$state[p_biden$p_biden > 0.1 & p_biden$p_biden < 0.3]
 
-tossup <- p_biden[p_biden >= 0.3 & p_biden <= 0.7, state]
+tossup <- p_biden$state[p_biden$p_biden >= 0.3 & p_biden$p_biden <= 0.7]
 ```
 
 Biden is likely to win: `r paste(biden_likely_winner, collapse = ", ")`.
@@ -133,7 +133,7 @@ for(s in sort(state_results$State)) {
     filter(state == s) %>%
     ggplot() + 
     aes(x = value, fill = candidate, group = NULL, y = ..density..) +
-    geom_histogram(position = "identity", alpha = 0.6, bins = 50) +
+    geom_histogram(position = "identity", alpha = 0.6, bins = 100) +
     scale_x_continuous(limits = c(0, 1),
                        breaks = seq(0, 1, 0.1),
                        labels = paste0(seq(0, 100, 10), "%")) +

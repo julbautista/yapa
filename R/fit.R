@@ -35,6 +35,9 @@ y <- polls %>%
   select(-state, -Sample, -days_out) %>%
   as.matrix()
 
+# Total sample in each poll
+n <- polls %>% pull(Sample)
+
 # Number of polls
 N <- nrow(y)
 
@@ -60,6 +63,7 @@ model_data <- list(n_options = n_options,
                    n_states = n_states, 
                    N = N,
                    y = y,
+                   n = n,
                    state_id = state_id,
                    priors = priors,
                    days_out = days_out,
@@ -71,7 +75,7 @@ model_data <- list(n_options = n_options,
 # Fit model ---------------------------------------------------------------
 
 m <- stan(file = "stan/yapa_states.stan", data = model_data,
-          chains = 4, iter = 4000)
+          chains = 10, iter = 5000)
 
 em <- rstan::extract(m)
 
@@ -101,8 +105,8 @@ results_trump <- data_frame(
   cand  = 'trump')
 
 # Save
-data.table::fwrite(results_biden, "results/results_biden.csv")
-data.table::fwrite(results_trump, "results/results_trump.csv")
+save(results_biden, file = "results/results_biden")
+save(results_trump, file = "results/results_trump")
 
 # Formatted Table
 state_results <- results_biden %>%
@@ -119,7 +123,7 @@ state_results <- results_biden %>%
   arrange(-`Mean Biden`) %>%
   mutate_if(is.numeric, function(x) paste0(round(x*100), "%"))
 
-data.table::fwrite(state_results, "results/state_results.csv")
+save(state_results, file = "results/state_results")
 
 
 # Plot
@@ -147,7 +151,7 @@ state_plot <- results_biden %>%
         plot.subtitle = element_text(size = 7),
         axis.text.y = element_text(size = 9))
 
-ggsave("docs/state_distributions.png", state_plot, height = 9)
+ggsave("results/state_distributions.png", state_plot, height = 9)
 
 
 
@@ -156,42 +160,44 @@ ggsave("docs/state_distributions.png", state_plot, height = 9)
 # Probability of winning the state
 p_biden <- round(apply(em$theta, 2, function(x) mean(x[, 2] > x[, 1])), 3)
 names(p_biden) <- state
+p_biden <- data.frame(p_biden) %>%
+  tibble::rownames_to_column("state")
 
-write.csv(data.frame(p_biden) %>%
-            tibble::rownames_to_column("state"),
-          "results/p_biden.csv", row.names = F)
+save(p_biden, file = "results/p_biden")
 
 
 
 
 # Simulate electoral college ----------------------------------------------
 
-er <- matrix(0, nrow = dim(em$theta)[1], ncol = dim(em$theta)[3])
+ec_sims <- matrix(0, nrow = dim(em$theta)[1], ncol = dim(em$theta)[3])
 
 # Simulate elections and results
-for(i in 1:dim(em$theta)[1]) {
-  for(s in 1:dim(em$theta)[2]) {
-    for(o in 1:dim(em$theta)[3]) {
+for(s in 1:dim(em$theta)[2]) {
+  for(o in 1:dim(em$theta)[3]) {
+    for(i in 1:dim(em$theta)[1]) {
       if(em$theta[i, s, o] == max(em$theta[i, s, ])) {
-        er[i, o] <- er[i, o] + prior_results$ev[s]
+        ec_sims[i, o] <- ec_sims[i, o] + prior_results$ev[s]
       }
     }
   }
 }
-data.table::fwrite(er, "results/electoral_college_sims.csv")
+
+save(ec_sims, file = "results/ec_sims")
 
 # Plot
 ec_plot <- data_frame(
-  electoral_votes = c(er[, 1], er[, 2]),
-  candidate = c(rep("Trump", nrow(er)), rep("Biden", nrow(er)))
+  electoral_votes = c(ec_sims[, 1], ec_sims[, 2]),
+  candidate = c(rep("Trump", nrow(ec_sims)), rep("Biden", nrow(ec_sims)))
 ) %>% 
   ggplot() +
   aes(x = electoral_votes, fill = candidate, y = ..density..) +
-  geom_histogram(alpha = 0.7, bins = 60,
+  geom_histogram(alpha = 0.7, bins = 538,
                  position = "identity") +
   scale_x_continuous(limits = c(0, 538),
                      breaks = c(seq(0, 538, 100), 270)) +
   scale_fill_manual(values = c("blue", "red")) +
+  geom_vline(xintercept = 270, lty = 2, col = "black") +
   theme_minimal() +
   labs(x = "electoral college votes", y = NULL, fill = NULL,
        title = "distribution of electoral college votes") +
@@ -202,24 +208,24 @@ ec_plot <- data_frame(
         axis.text.y = element_blank(),
         axis.text.x = element_text(size = 11))
 
-ggsave("docs/ec_distributions.png", ec_plot)
+ggsave("results/ec_distributions.png", ec_plot)
 
 
 
 
 # State simulations -------------------------------------------------------
 
-simulations <- data_frame(
-  value = c(c(em$theta[, , 1]), c(em$theta[, , 2]), c(em$theta[, , 3])),
+state_simulations <- data_frame(
+  value = round(c(c(em$theta[, , 1]), c(em$theta[, , 2]), c(em$theta[, , 3])), 3),
   state = rep(rep(state,  each = dim(em$theta)[1]), times = 3),
   candidate = rep(c("Trump", "Biden", "Other"), each = dim(em$theta)[1]*51)
 ) %>%
   group_by(state, candidate) %>%
-  mutate(mean = mean(value)) %>%
+  mutate(mean = round(mean(value), 3)) %>%
   ungroup() %>%
   arrange(state)
 
-data.table::fwrite(simulations, "results/state_simulations.csv", row.names = F)
+save(state_simulations, file = "results/state_simulations")
 
 
 
