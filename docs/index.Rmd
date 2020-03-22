@@ -1,5 +1,5 @@
 ---
-title: "Yet Another Poll Aggregator"
+title: "yapa"
 author: "Alex Pavlakis"
 output: 
   html_document:
@@ -25,7 +25,7 @@ load("../results/results_biden")
 load("../results/results_trump")
 ```
 
-# Topline
+# national
 
 ```{r topline-ec}
 biden <- round(quantile(ec_sims[, 2], c(0.05, 0.95)))
@@ -62,31 +62,35 @@ data_frame(
 ```
 
 
-# States
+# states
 
-```{r stateresults}
-biden_likely_winner <- p_biden$state[p_biden$p_biden >= 0.9]
-biden_favored <- p_biden$state[p_biden$p_biden > 0.7 & p_biden$p_biden < 0.9]
 
-trump_likely_winner <- p_biden$state[p_biden$p_biden < 0.1]
-trump_favored <- p_biden$state[p_biden$p_biden > 0.1 & p_biden$p_biden < 0.3]
+```{r stateresults, results = T}
+p_biden %>%
+  mutate(cat = case_when(p_biden >= 0.9 ~ "Likely Biden",
+                         p_biden > 0.7 & p_biden < 0.9 ~ "Lean Biden",
+                         p_biden <= 0.1 ~ "Likely Trump",
+                         p_biden > 0.1 & p_biden < 0.3 ~ "Lean Trump", 
+                         TRUE ~ "Tossup")) %>%
+  group_by(cat) %>%
+  arrange(p_biden) %>%
+  mutate(rank = row_number()) %>%
+  ungroup() %>%
+  mutate(rank = max(rank) - rank) %>%
+  ggplot() +
+  aes(x = reorder(cat, p_biden), y = rank, label = state, col = p_biden) +
+  geom_text() +
+  geom_text(alpha = 0.8, size = 4) +
+  scale_x_discrete(position = "top") +
+  theme_void() +
+  theme(axis.text.x = element_text(size = 12, face = "bold", color = "grey10"),
+        axis.text.y = element_blank()) +
+  labs(x = NULL, y = NULL) +
+  guides(col = F) +
+  scale_color_gradient(low = "red",  high = "blue")
 
-tossup <- p_biden$state[p_biden$p_biden >= 0.3 & p_biden$p_biden <= 0.7]
 ```
 
-Biden is likely to win: `r paste(biden_likely_winner, collapse = ", ")`.
-
-Biden is favored to win: `r paste(biden_favored, collapse = ", ")`.
-
-
-
-Trump is likely to win: `r paste(trump_likely_winner, collapse = ", ")`.
-
-Trump is favored to win: `r paste(trump_favored, collapse = ", ")`
-
-The outcomes in the following states are uncertain at this time: `r paste(tossup, collapse = ", ")`
-
-Note that uncertainties at this time are due to a) close races and/or b) few polls  As more polls become available and election day nears, the outcome of some states marked uncertain will become clearer.
 
 
 ```{r stateplot, results = T, fig.height = 8, fig.align = 'center'}
@@ -116,6 +120,10 @@ results_biden %>%
 ```
 
 
+
+Note that uncertainties at this time are due to a) close races and/or b) few polls.  As more polls become available and election day nears, error bars should shrink and the range of reasonable potential outcomes should narrow.
+
+
 ```{r table}
 DT::datatable(state_results, options = list(scrollX = TRUE, 
                                             scrollY = "200px",
@@ -123,7 +131,7 @@ DT::datatable(state_results, options = list(scrollX = TRUE,
 ```
 
 
-## State detail
+## state detail
 
 ```{r state-detail, results = TRUE}
 library(tidyverse)

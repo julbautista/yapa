@@ -1,13 +1,12 @@
 ---
 title: "Methodology"
-author: "Alex Pavlakis"
 output: 
   html_document:
     theme: cerulean
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = F, message = F, cache = T)
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, resuts = F)
 ```
 
 
@@ -15,21 +14,39 @@ Yapa is a simple poll aggregator that estimates state-level support for US presi
 
 # Model
 
-The number of respondents in each poll ($y_p$) is drawn from the total respondents in than poll $n_p$ at proportion specific to the candidate and the state $\theta_{s, c}$.  That rate parameter is samples based on a candidate-state specific mean $\alpha_{c, s}$ and state specific variance $t_s$.  The sum of proportions for each candidate must equal one.
+The number of respondents in each poll $y_p$ is drawn from the total respondents in than poll $n_p$ at a rate specific to the candidate and the state $\theta_{s, c}$.  That rate parameter is distributed with a candidate-state specific center $\alpha_{c, s}$ and state specific scale $t_s$.  The sum of proportions for each candidate must equal one.
 
 $$
 \begin{align}
 y_{p, c} &\sim Binomial(n_p, \theta_{s, c}) \\
-\theta_{s, c} &\sim Normal(\alpha_{s, c}, \tau_{s}) \\
+\theta_{s, c} &\sim Student\_t(\nu, \alpha_{s, c}, \tau_{s}) \\
 \sum_c \theta_s &= 1 
 \end{align}
 $$
 
 In this model, we use the results of the previous presidential election in each state as prior $\alpha$.
 
+## Weighting 
+
+Polls tend to contribute more to final inferences if they have a) larger sample sizes and b) are closer to the election. We weight polls by recency according to the exponential decay model:
+
+$$
+wt_p = e^\frac{-days\_out_p}{60}
+$$
+
+```{r fig.align='center', echo = F}
+days <- seq(0, 365, 1)
+wt <- exp(-days/60)
+
+par(las = 1, mar = c(4, 4, 1, 1))
+plot(days, wt, type = "l", bty = 'n', 
+     xlab = "days from election", ylab = "poll weight",
+     main = NULL)
+```
+
 ## Assumptions
 
-1. Polls are unbiased _on average_ (unrealistic).
-2. There is no time-trend in the true underlying support for each candidate in each state, just different realizations from a distribution (unrealistic).
-3. State general election results are unlikely to deviate more than 20 percentage points from their results in the previous general election.
+1. Each poll is a draw from a distribution of potential election outcomes.
+2. There is no time-trend in the underlying support for each candidate in each state (unrealistic).
+3. State-level results are unlikely to deviate substantially from one presidential election to the next.
 
