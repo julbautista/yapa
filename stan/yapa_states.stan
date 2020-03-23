@@ -26,8 +26,7 @@ transformed data {
   int n_wt[N];                       // weighted sample
   for(i in 1:N) {
     for(o in 1:n_options) {
-      y_wt[i, o] = real_to_int(
-        exp(-days_out[i]/decay_param)*(y[i, o]));
+      y_wt[i, o] = real_to_int(exp(-days_out[i]/decay_param)*(y[i, o]));
     }
     n_wt[i] = sum(y_wt[i, ]);
   } 
@@ -48,7 +47,13 @@ model {
       theta[s][o] ~ student_t(nu, priors[s, o], tau[s]); // prior on proportion
     }
   }
-  tau ~ normal(0.2, 0.01); // prior on variance
+  tau ~ normal(0.2, 0.01);
   nu ~ gamma(2, 0.1);      // Prior on df, from vetari
+}
+generated quantities {
+  simplex[n_options] results[n_states];
+  for(s in 1:n_states) {
+    results[s] = dirichlet_rng(100*theta[s]);
+  }
 }
 

@@ -63,6 +63,7 @@ model_data <- list(n_options = n_options,
                    n_states = n_states, 
                    N = N,
                    y = y,
+                   n = n,
                    state_id = state_id,
                    priors = priors,
                    days_out = days_out,
@@ -83,11 +84,11 @@ em <- rstan::extract(m)
 # Visualize ---------------------------------------------------------------
 
 # Results
-means_trump <- apply(em$theta, 2, function(x) mean(x[, 1]))
-quantiles_trump <- apply(em$theta, 2, function(x) quantile(x[, 1], c(0.1, 0.9)))
+means_trump <- apply(em$results, 2, function(x) mean(x[, 1]))
+quantiles_trump <- apply(em$results, 2, function(x) quantile(x[, 1], c(0.1, 0.9)))
 
-means_biden <- apply(em$theta, 2, function(x) mean(x[, 2]))
-quantiles_biden <- apply(em$theta, 2, function(x) quantile(x[, 2], c(0.1, 0.9)))
+means_biden <- apply(em$results, 2, function(x) mean(x[, 2]))
+quantiles_biden <- apply(em$results, 2, function(x) quantile(x[, 2], c(0.1, 0.9)))
 
 results_biden <- data_frame(
   state = state,
@@ -157,7 +158,7 @@ ggsave("results/state_distributions.png", state_plot, height = 9)
 # P-win --------------------------------------------------------------------
 
 # Probability of winning the state
-p_biden <- round(apply(em$theta, 2, function(x) mean(x[, 2] > x[, 1])), 3)
+p_biden <- round(apply(em$results, 2, function(x) mean(x[, 2] > x[, 1])), 3)
 names(p_biden) <- state
 p_biden <- data.frame(p_biden) %>%
   tibble::rownames_to_column("state")
@@ -169,13 +170,13 @@ save(p_biden, file = "results/p_biden")
 
 # Simulate electoral college ----------------------------------------------
 
-ec_sims <- matrix(0, nrow = dim(em$theta)[1], ncol = dim(em$theta)[3])
+ec_sims <- matrix(0, nrow = dim(em$results)[1], ncol = dim(em$results)[3])
 
 # Simulate elections and results
-for(s in 1:dim(em$theta)[2]) {
-  for(o in 1:dim(em$theta)[3]) {
-    for(i in 1:dim(em$theta)[1]) {
-      if(em$theta[i, s, o] == max(em$theta[i, s, ])) {
+for(s in 1:dim(em$results)[2]) {
+  for(o in 1:dim(em$results)[3]) {
+    for(i in 1:dim(em$results)[1]) {
+      if(em$results[i, s, o] == max(em$results[i, s, ])) {
         ec_sims[i, o] <- ec_sims[i, o] + prior_results$ev[s]
       }
     }
@@ -215,9 +216,9 @@ ggsave("results/ec_distributions.png", ec_plot)
 # State simulations -------------------------------------------------------
 
 state_simulations <- data_frame(
-  value = round(c(c(em$theta[, , 1]), c(em$theta[, , 2]), c(em$theta[, , 3])), 3),
-  state = rep(rep(state,  each = dim(em$theta)[1]), times = 3),
-  candidate = rep(c("Trump", "Biden", "Other"), each = dim(em$theta)[1]*51)
+  value = round(c(c(em$results[, , 1]), c(em$results[, , 2]), c(em$results[, , 3])), 3),
+  state = rep(rep(state,  each = dim(em$results)[1]), times = 3),
+  candidate = rep(c("Trump", "Biden", "Other"), each = dim(em$results)[1]*51)
 ) %>%
   group_by(state, candidate) %>%
   mutate(mean = round(mean(value), 3)) %>%

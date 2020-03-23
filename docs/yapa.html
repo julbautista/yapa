@@ -297,7 +297,7 @@ $(document).ready(function () {
 <p>Yapa is a simple poll aggregator that estimates state-level support for US presidential candidates by combining state-level polls with prior election results.</p>
 <div id="model" class="section level1">
 <h1>Model</h1>
-<p>The number of respondents in each poll <span class="math inline">\(y_p\)</span> is drawn from the total respondents in than poll <span class="math inline">\(n_p\)</span> at a rate specific to the candidate and the state <span class="math inline">\(\theta_{s, c}\)</span>. That rate parameter is distributed with a candidate-state specific center <span class="math inline">\(\alpha_{c, s}\)</span> and state specific scale <span class="math inline">\(t_s\)</span>. The sum of proportions for each candidate must equal one.</p>
+<p>The number of respondents in each poll <span class="math inline">\(y_p\)</span> is drawn from the total respondents in that poll <span class="math inline">\(n_p\)</span> at a rate specific to the candidate and the state <span class="math inline">\(\theta_{s, c}\)</span>. The rate parameters is distributed with a candidate-state specific center <span class="math inline">\(\alpha_{c, s}\)</span> and state specific scale <span class="math inline">\(t_s\)</span>. The sum of proportions for each candidate must equal one.</p>
 <p><span class="math display">\[
 \begin{align}
 y_{p, c} &amp;\sim Binomial(n_p, \theta_{s, c}) \\
@@ -305,7 +305,7 @@ y_{p, c} &amp;\sim Binomial(n_p, \theta_{s, c}) \\
 \sum_c \theta_s &amp;= 1 
 \end{align}
 \]</span></p>
-<p>In this model, we use the results of the previous presidential election in each state as prior <span class="math inline">\(\alpha\)</span>.</p>
+<p>In this model, we use the results of the previous presidential election in each state as prior <span class="math inline">\(\alpha\)</span>. All code and data are available at <a href="https://github.com/alexpavlakis/yapa">github.com/alexpavlakis/yapa</a>.</p>
 <div id="weighting" class="section level2">
 <h2>Weighting</h2>
 <p>Polls tend to contribute more to final inferences if they have a) larger sample sizes and b) are closer to the election. We weight polls by recency according to the exponential decay model:</p>
