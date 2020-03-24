@@ -52,8 +52,12 @@ model {
 }
 generated quantities {
   simplex[n_options] results[n_states];
+  vector[n_options] bias;
+  for(o in 1:n_options) {
+    bias[o] = normal_rng(100, 5);
+  }
   for(s in 1:n_states) {
-    results[s] = dirichlet_rng(100*theta[s]);
+    results[s] = dirichlet_rng(bias .* theta[s]);
   }
 }
 

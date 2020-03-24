@@ -34,6 +34,7 @@ trump <- round(quantile(ec_sims[, 1], c(0.05, 0.95)))
 
 Biden is projected to win between `r biden[1]` and `r biden[2]` electoral college votes.  Trump is projected to win between `r trump[1]` and `r trump[2]` electoral college votes (90% uncertainty interval).
 
+The plot below displays the distribution of potential electoral college results based on `r dim(ec_sims)[1]` simulations of the general election from the perspective of today.
 
 
 ```{r ecplot, results = T, fig.width = 10}
@@ -91,7 +92,7 @@ p_biden %>%
 
 ```
 
-
+The plot below displays the distribution of potential outcomes for the top two candidates in each state.  
 
 ```{r stateplot, results = T, fig.height = 8, fig.align = 'center'}
 results_biden %>%
@@ -130,8 +131,6 @@ DT::datatable(state_results, options = list(scrollX = TRUE,
                                             pageLength = 51))
 ```
 
-
-## state detail
 
 ```{r state-detail, results = TRUE}
 library(tidyverse)

@@ -20,7 +20,8 @@ process_rcp <- function(site, election_day = "2020-11-06", n = Inf) {
   # If site is NULL, assume there is no data
   if(is.null(site)) {
     polls <- data_frame(
-      Sample = 0, `Biden (D)` = 0, `Trump (R)` = 0, Other = 0, days_out = 365
+      Sample = 0, `Biden (D)` = 0, 
+      `Trump (R)` = 0, Other = 0, days_out = 365
     )
   } else {
     
@@ -36,7 +37,7 @@ process_rcp <- function(site, election_day = "2020-11-06", n = Inf) {
       mutate(Sample = as.numeric(gsub("([0-9]+).*$", "\\1", Sample))) %>%
       mutate(end_date = sapply(strsplit(Date, " - "), tail, 1),
              end_date = as.Date(paste0(end_date, "/2020"), "%m/%d/%Y"),
-             end_date = if_else(end_date > Sys.Date(), as.Date(gsub("2020", "2019", end_date)),
+             end_date = if_else(end_date > "2020-11-06", as.Date(gsub("2020", "2019", end_date)),
                                 end_date)) %>%
       mutate_if(is.character, function(x) gsub("--", "0", x)) %>%
       mutate(days_out = date_diff(election_day, end_date)) %>%
