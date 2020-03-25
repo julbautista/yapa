@@ -14,7 +14,7 @@ date_diff <- function(t1, t2) {
 # Parameters:
 ## site: character string to web address of rcp site;
 ## election day: character string of election day, used for weighting polls;
-## wt_function: function for weighting polls.  Default is 1/sqrt(days from election).
+## n: how many recent polls should we look at?
 process_rcp <- function(site, election_day = "2020-11-06", n = Inf) {
   
   # If site is NULL, assume there is no data
@@ -37,7 +37,7 @@ process_rcp <- function(site, election_day = "2020-11-06", n = Inf) {
       mutate(Sample = as.numeric(gsub("([0-9]+).*$", "\\1", Sample))) %>%
       mutate(end_date = sapply(strsplit(Date, " - "), tail, 1),
              end_date = as.Date(paste0(end_date, "/2020"), "%m/%d/%Y"),
-             end_date = if_else(end_date > "2020-11-06", as.Date(gsub("2020", "2019", end_date)),
+             end_date = if_else(end_date > Sys.Date(), as.Date(gsub("2020", "2019", end_date)),
                                 end_date)) %>%
       mutate_if(is.character, function(x) gsub("--", "0", x)) %>%
       mutate(days_out = date_diff(election_day, end_date)) %>%
