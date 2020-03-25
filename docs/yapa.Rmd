@@ -6,7 +6,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, resuts = F)
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, resuts = F, fig.align = 'center')
 ```
 
 
@@ -50,9 +50,9 @@ plot(days, wt, type = "l", bty = 'n',
      main = NULL)
 ```
 
-## Backtesting
+# Backtesting
 
-To evaluate this model, we simulate potential election results for 2016 based on 2012 state outcomes and 2016 state polls, and compare those to the actual results.  The plot below displays the predictions and 90% uncertain intervals for Clinton's vote share in each state (x axis) with the actual election results (y axis).  94% of actual results fall within the 90% intervals.  This model would have given Trump about a 70% chance of winning the election, and it would have handled the uncertainty in key battleground states much better than other poll aggregators and forecasters.
+To evaluate this model, we simulate potential election results for 2016 based on 2012 state outcomes and 2016 state polls, and compare those to the actual results.  The plot below displays the predictions and 90% uncertain intervals for Clinton's vote share in each state (x axis) with the actual election results (y axis).  94% of actual results fall within the 90% intervals.  This model would have given Trump a ~30% chance of winning the election, and it would have handled the uncertainty in key battleground states much better than other poll aggregators and forecasters.
 
 ```{r plot, include = T}
 library(tidyverse)
