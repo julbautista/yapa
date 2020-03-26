@@ -12,12 +12,12 @@ functions {
   }
 }
 data {
-  int N;               // number of polls
-  int n_states;        // number of states 
-  int n_options;       // number of candidates
-  int state_id[N];     // state identifier
+  int N;                  // number of polls
+  int n_states;           // number of states 
+  int n_options;          // number of candidates
+  int state_id[N];        // state identifier
   matrix[N, n_options] y; // matrix of counts for each candidate in each poll
-  vector[N] days_out;  // days until election (for weighting)
+  vector[N] days_out;     // days until election (for weighting)
   matrix<lower = 0, upper = 1>[n_states, n_options] priors; // prior rates
   real<lower = 0> decay_param;
 }
@@ -54,10 +54,10 @@ generated quantities {
   simplex[n_options] results[n_states];
   vector[n_options] bias;
   for(o in 1:n_options) {
-    bias[o] = normal_rng(100, 5);
+    bias[o] = normal_rng(100, 5); // Sample a bias
   }
   for(s in 1:n_states) {
-    results[s] = dirichlet_rng(bias .* theta[s]);
+    results[s] = dirichlet_rng(bias .* theta[s]); // Simulate an election
   }
 }
 

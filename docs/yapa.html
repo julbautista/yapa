@@ -280,7 +280,10 @@ $(document).ready(function () {
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="index.html">Home</a>
+  <a href="index.html">2020</a>
+</li>
+<li>
+  <a href="vs_2016.html">vs 2016</a>
 </li>
 <li>
   <a href="yapa.html">Methodology</a>
@@ -302,16 +305,16 @@ $(document).ready(function () {
 </div>
 
 
-<p>Yapa is a simple poll aggregator that estimates state-level support for US presidential candidates by combining state-level polls with prior election results.</p>
+<p>Yapa is a simple poll aggregator that estimates state-level support for US presidential candidates by combining state-level polls with previous election results.</p>
 <div id="model" class="section level1">
 <h1>Model</h1>
-<p>We model state level support for each presidential candidate in three layers:</p>
+<p>We model state level support for each presidential candidate with three layers:</p>
 <ol style="list-style-type: decimal">
 <li><strong>Prior</strong>: the results in that state from the previous general election;</li>
 <li><strong>Data</strong>: state-level polls, weighted by recency and sample size;</li>
 <li><strong>Non-sampling error</strong>: we simulate polling error based on its historical distribution, including correlated errors across states.</li>
 </ol>
-<p>Specifically, the number of respondents that support each candidate in each poll <span class="math inline">\(y_{p, c}\)</span> is drawn from the total respondents in that poll <span class="math inline">\(n_p\)</span> at a rate specific to the candidate and the state <span class="math inline">\(\theta_{s, c}\)</span>. The rate parameters are distributed with a candidate-state specific center <span class="math inline">\(\alpha_{c, s}\)</span> and state specific scale <span class="math inline">\(t_s\)</span>. The sum of proportions for each candidate must equal one. Finally, to simulate true underlying support, we first sample a vector of <em>biases</em> for each candidate, then sample support based on each state’s rate parameter and the sampled bias. These simulations are repeated tens of thousands of times.</p>
+<p>Specifically, the number of respondents that support each candidate in each poll <span class="math inline">\(y_{p, c}\)</span> is drawn from the total respondents in that poll <span class="math inline">\(n_p\)</span> at a rate specific to the candidate and the state <span class="math inline">\(\theta_{s, c}\)</span>. The rate parameters are distributed with a candidate-state specific center <span class="math inline">\(\alpha_{c, s}\)</span> and state specific scale <span class="math inline">\(\tau_s\)</span>. The sum of proportions for each candidate must equal one. Finally, to simulate true underlying support, we first sample a vector of <em>biases</em> for each candidate, then sample support based on each state’s rate parameter and the sampled bias. These simulations are repeated tens of thousands of times.</p>
 <p><span class="math display">\[
 \begin{align}
 y_{p, c} &amp;\sim Binomial(n_p, \theta_{s, c}) \\
@@ -322,9 +325,9 @@ y_{p, c} &amp;\sim Binomial(n_p, \theta_{s, c}) \\
 <p>All code and data are available at <a href="https://github.com/alexpavlakis/yapa">github.com/alexpavlakis/yapa</a>.</p>
 <div id="weighting" class="section level2">
 <h2>Weighting</h2>
-<p>Polls tend to contribute more to final inferences if they have a) larger sample sizes and b) are closer to the election. We weight polls by recency according to the exponential decay model:</p>
+<p>Polls tend to contribute more to final inferences if they have a) larger sample sizes and b) are closer to the election. We discount polls by recency according to the exponential decay model:</p>
 <p><span class="math display">\[
-wt_p = e^\frac{-days\_out_p}{60}
+discount_p = e^\frac{-days\_out_p}{60}
 \]</span></p>
 <p><img src="yapa_files/figure-html/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>

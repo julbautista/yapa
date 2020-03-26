@@ -3,8 +3,10 @@ output_dir: "."
 navbar:
   title: " "
   left:
-  - text: "Home"
+  - text: "2020"
     href: index.html
+  - text: "vs 2016"
+    href: vs_2016.html
   - text: "Methodology"
     href: yapa.html
 output:

@@ -1,0 +1,77 @@
+---
+title: "2020 vs 2016"
+output: 
+  html_document:
+    theme: cerulean
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = F, message = F, cache = F, fig.align = 'center')
+```
+
+
+```{r data}
+library(tidyverse)
+prior_results <- read_csv("../data/state_results_16.csv")
+load("../results/results_trump")
+
+vs_2016 <- results_trump %>%
+  left_join(prior_results) %>%
+  left_join(data.frame(state = c(state.name, "District of Columbia"),
+                       abb = c(state.abb, "DC"))) %>%
+  mutate(diff = mean - rep)
+
+```
+
+The table below categorizes states based on how Trump is performing in them relative to his performance in 2016.  
+
+```{r table, results = TRUE}
+vs_2016 %>%
+  mutate(cat = case_when(diff < -0.05 ~ "Worse than 2016",
+                         diff > 0.05 ~ "Better than 2016",
+                         TRUE ~ "Close to 2016")) %>%
+  group_by(cat) %>%
+  arrange(diff) %>%
+  mutate(rank = row_number()) %>%
+  ungroup() %>%
+  mutate(rank = max(rank) - rank) %>%
+  ggplot() +
+  aes(x = reorder(cat, diff), y = rank, label = state, col = diff) +
+  geom_text() +
+  geom_text(alpha = 0.8, size = 4) +
+  scale_x_discrete(position = "top") +
+  theme_void() +
+  theme(axis.text.x = element_text(size = 12, face = "bold", color = "#007ba7"),
+        axis.text.y = element_blank(),
+        plot.title = element_text(hjust = 0.5, color = "#007ba7", face = "bold")) +
+  labs(x = NULL, y = NULL,
+       title = "Trump performance is...") +
+  guides(col = F) +
+  scale_color_gradient(low = "blue",  high = "red")
+
+```
+
+
+
+The plot below displays Donald Trump's 2016 vote percentage in each state against average estimates from model simulations of the 2020 election. If a state is on the _right_ side of the line, Trump is doing worse there than in 2016.  If it is on the _left_ side, he is doing better.
+
+```{r plot, results = TRUE}
+
+vs_2016 %>% 
+  ggplot() +
+  aes(x = rep, y = mean, col = -1*diff, label = abb) +
+  geom_abline(intercept = 0, slope = 1, lty = 2, col = 'darkgrey') +
+  geom_point(alpha = 0.8, cex = 0.7) +  
+  ggrepel::geom_text_repel(size = 3, lwd = 0.4) +
+  scale_color_gradient(low = "red", high = "blue") +
+  scale_x_continuous(limits = c(0, 1),
+                     labels = paste0(seq(0, 100, 25), "%")) +
+  scale_y_continuous(limits = c(0, 1),
+                     labels = paste0(seq(0, 100, 25), "%")) +
+  guides(col = F) +
+  theme_minimal() +
+  labs(x = "2016 results", y = "2020 prediction",
+       title = NULL) +
+  theme(plot.title = element_text(size = 15, face = "bold", color = "#007ba7")) 
+
+```
