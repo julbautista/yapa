@@ -172,18 +172,35 @@ save(p_biden, file = "results/p_biden")
 
 ec_sims <- matrix(0, nrow = dim(em$results)[1], ncol = dim(em$results)[3])
 
-# Simulate elections and results
-for(s in 1:dim(em$results)[2]) {
-  for(o in 1:dim(em$results)[3]) {
-    for(i in 1:dim(em$results)[1]) {
-      if(em$results[i, s, o] == max(em$results[i, s, ])) {
-        ec_sims[i, o] <- ec_sims[i, o] + prior_results$ev[s]
-      }
-    }
+for(i in 1:dim(em$results)[1]) {
+  winner <- apply(em$results[i, , ], 1, function(x) which(x == max(x)))
+  for(s in 1:dim(em$results)[2]) {
+    ec_sims[i, winner[s]] <- ec_sims[i, winner[s]] + prior_results$ev[s]
   }
 }
 
 save(ec_sims, file = "results/ec_sims")
+
+# Create data frame of results for tracking
+ec_ts_today <- data_frame(
+  date = Sys.Date(),
+  lower_trump = quantile(ec_sims[, 1], 0.05),
+  mean_trump = mean(ec_sims[, 1]),
+  upper_trump = quantile(ec_sims[, 1], 0.95),
+  lower_biden = quantile(ec_sims[, 2], 0.05),
+  mean_biden = mean(ec_sims[, 2]),
+  upper_biden = quantile(ec_sims[, 2], 0.95)
+)
+
+# Append to tracking data
+ec_ts <- read_csv("results/ec_ts.csv")
+
+ec_ts <- ec_ts %>%
+  filter(date != Sys.Date()) %>%
+  rbind(ec_ts_today)
+
+write_csv(ec_ts, "results/ec_ts.csv")
+
 
 # Plot
 ec_plot <- data_frame(

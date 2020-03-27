@@ -15,7 +15,7 @@ date_diff <- function(t1, t2) {
 ## site: character string to web address of rcp site;
 ## election day: character string of election day, used for weighting polls;
 ## n: how many recent polls should we look at?
-process_rcp <- function(site, election_day = "2020-11-06", n = Inf) {
+process_rcp <- function(site, election_day = "2020-11-03", n = Inf) {
   
   # If site is NULL, assume there is no data
   if(is.null(site)) {
