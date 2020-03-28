@@ -28,6 +28,8 @@ _Updated `r format(Sys.Date(), format="%B %dth, %Y")`._
 
 # Who will win the presidency?
 
+## Current snapshot
+
 ```{r topline-ec}
 biden <- round(quantile(ec_sims[, 2], c(0.05, 0.95)))
 trump <- round(quantile(ec_sims[, 1], c(0.05, 0.95)))
@@ -36,12 +38,11 @@ trump <- round(quantile(ec_sims[, 1], c(0.05, 0.95)))
 Biden is projected to win between **`r biden[1]` - `r biden[2]`** electoral college votes.  Trump is projected to win between **`r trump[1]` - `r trump[2]`** electoral college votes.  In `r dim(ec_sims)[1]` simulations of the presidential election from the perspective of `r format(Sys.Date(), format="%B %dth, %Y")`, Biden wins **`r paste0(round(mean(ec_sims[, 2] > ec_sims[, 1])*100), "%")`** and Trump wins **`r paste0(round(mean(ec_sims[, 1] > ec_sims[, 2])*100), "%")`**.
 
 
-
 ```{r ecplot, results = T, fig.width = 10}
 data_frame(
   electoral_votes = c(ec_sims[, 1], ec_sims[, 2]),
   candidate = c(rep("Trump", nrow(ec_sims)), rep("Biden", nrow(ec_sims)))
-) %>% 
+) %>% filter(electoral_votes != 268) %>%
   ggplot() +
   aes(x = electoral_votes, fill = candidate, y = ..density..) +
   geom_histogram(alpha = 0.7, bins = 538,
@@ -51,7 +52,7 @@ data_frame(
   scale_fill_manual(values = c("blue", "red")) +
   geom_vline(xintercept = 270, lty = 2, col = "black") +
   theme_minimal() +
-  labs(x = "electoral college votes", y = NULL, fill = NULL,
+  labs(x = NULL, y = NULL, fill = NULL,
        title = "distribution of electoral college votes") +
   theme(legend.position = "bottom",
         plot.title = element_text(size = 15, face = "bold", hjust = .5,
@@ -63,10 +64,45 @@ data_frame(
 
 ```
 
+## Over time
 
+```{r over time}
+ec_ts <- read_csv("../results/ec_ts.csv")
+
+ec_ts %>%
+  gather(metric, value, -date) %>%
+  mutate(candidate = sapply(strsplit(metric, "_"), tail, 1),
+         metric = sapply(strsplit(metric, "_"), head, 1)) %>%
+  spread(metric, value) %>%
+  ggplot() +
+  aes(x = date, y = mean, ymin = lower, ymax = upper,
+      col = candidate, fill = candidate) +
+  geom_line() +
+  geom_ribbon(col = NA, alpha = 0.3) +
+  scale_x_date(limits = c(as.Date(min(ec_ts$date)), as.Date("2020-11-10")),
+               date_breaks = "1 month",
+               date_labels =  "%b, %Y") +
+  scale_y_continuous(limits = c(0, 538),
+                     breaks = c(0, 100, 200, 270, 300, 400, 500, 538)) +
+  geom_vline(xintercept = as.Date("2020-11-03"), lty = 2, col = "darkgrey") +
+  geom_hline(yintercept = 270, lty = 2, col = "darkgrey") +
+  theme_minimal() +
+  scale_color_manual(values = c("blue", "red")) +
+  scale_fill_manual(values = c("blue", "red")) +
+  labs(col = NULL, fill = NULL, y = NULL, x = NULL,
+       title = "electoral college votes") +
+  theme(panel.grid.minor = element_blank(),
+        legend.position = "bottom",
+        plot.title = element_text(size = 15, face = "bold", color = "#007ba7", hjust = 0.5)) +
+  guides(col = F)
+
+
+```
 
 
 # Who will win each state?
+
+## Overview
 
 
 ```{r stateresults, results = 'asis'}
@@ -99,21 +135,23 @@ p_biden %>%
 
 
 ```{r stateplot, results = TRUE, fig.height = 8, fig.align = 'center'}
+lwd <- 1.1
+cex <- 1.2
+alpha <- 0.5
+
 results_biden %>%
   ggplot() +
   aes(x = mean, y = reorder(state, mean),
       xmin = lower, xmax = upper) +
-  geom_point(col = "blue", cex = 0.8) +
-  geom_errorbarh(height = 0, col = "blue", lwd = 0.3) +
+  geom_errorbarh(height = 0, col = "blue", lwd = lwd, alpha = alpha) +
   geom_point(data = results_trump, 
              aes(x = mean, y = state,
                  xmin = lower, xmax = upper),
-             col = "red", cex = 0.8) +
+             col = "red", cex = cex) +
   geom_errorbarh(data = results_trump,
-                 aes(x = mean, y = state,
-                     xmin = lower, xmax = upper), 
-                 height = 0, col = "red", lwd = 0.3) +
-  geom_point(col = "blue", cex = 0.8) +
+                 aes(x = mean, xmin = lower, xmax = upper), 
+                 height = 0, col = "red", lwd = lwd, alpha = alpha) +
+  geom_point(col = "blue", cex = cex) +
   theme_minimal() +
   scale_x_continuous(breaks = seq(0, 1, 0.25),
                      labels = paste0(seq(0, 100, 25), "%")) +
@@ -137,31 +175,46 @@ DT::datatable(state_results, options = list(scrollX = TRUE,
 
 
 ```{r state-detail, results = TRUE}
-library(tidyverse)
-for(s in sort(state_results$State)) {
-  print(
-    state_simulations %>%
-      filter(state == s) %>%
-      ggplot() + 
-      aes(x = value, fill = candidate, group = NULL, y = ..density..) +
-      geom_histogram(position = "identity", alpha = 0.6, bins = 100) +
-      scale_x_continuous(limits = c(0, 1),
-                         breaks = seq(0, 1, 0.1),
-                         labels = paste0(seq(0, 100, 10), "%")) +
-      scale_fill_manual(values = c("blue", "grey", "red")) +
-      scale_color_manual(values = c("blue", "grey", "red")) +
-      geom_vline(aes(xintercept = mean, col = candidate), lty = 2) +
-      theme_minimal() +
-      theme(panel.grid.minor = element_blank(),
-            axis.text.y = element_blank(),
-            axis.title.x = element_text(size = 9),
-            legend.position = 'bottom',
-            plot.title = element_text(size = 15, face = "bold", hjust = 0.5,
-                                      color = "#007ba7"),
-            plot.subtitle = element_text(size = 9)) +
-      labs(x = NULL, y = NULL, fill = NULL, col = NULL,
-           title = paste(s)) +
-      guides(col = FALSE)
-  )
+state_ts <- read_csv("../results/state_ts.csv")
+plot_state_ts <- function(s) {
+  p <- state_ts %>% 
+    filter(state == s) %>% select(-state) %>%
+    gather(metric, value, -date) %>%
+    mutate(candidate = sapply(strsplit(metric, "_"), tail, 1),
+           metric = sapply(strsplit(metric, "_"), head, 1)) %>%
+    spread(metric, value) %>%
+    ggplot() +
+    aes(x = date, y = mean, ymin = lower, ymax = upper,
+        col = candidate, fill = candidate) +
+    geom_hline(yintercept = 0.5, lty = 2, col = "black") +
+    geom_line(aes(group = candidate)) +
+    geom_ribbon(col = NA, alpha = 0.3) +
+    scale_x_date(limits = c(as.Date(min(ec_ts$date)), as.Date("2020-11-10")),
+                 date_breaks = "1 month",
+                 date_labels =  "%b, %Y") +
+    scale_y_continuous(limits = c(0, 1),
+                       breaks = seq(0, 1, 0.25),
+                       labels = paste0(seq(0, 100, 25), "%")) +
+    geom_vline(xintercept = as.Date("2020-11-03"), lty = 2, col = "darkgrey") +
+    theme_minimal() +
+    scale_color_manual(values = c("blue", "red")) +
+    scale_fill_manual(values = c("blue", "red")) +
+    labs(col = NULL, fill = NULL, y = NULL, x = NULL, title = NULL) +
+    theme(panel.grid.minor = element_blank(),
+          legend.position = "bottom",
+          plot.title = element_text(size = 15, face = "bold", color = "#007ba7", hjust = 0.5)) +
+    guides(col = F, fill = F)
+  print(p)
+}
+
+```
+
+
+```{r statests, results='asis'}
+library(pander)
+for (s in p_biden$state) {
+   pander::pandoc.p('')
+   pander::pandoc.header(s, level = 2)
+   plot_state_ts(s)
 }
 ```

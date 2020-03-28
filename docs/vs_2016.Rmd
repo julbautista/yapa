@@ -52,10 +52,10 @@ vs_2016 %>%
 ```
 
 
-
 The plot below displays Donald Trump's 2016 vote percentage in each state against average estimates from model simulations of the 2020 election. If a state is on the _right_ side of the line, Trump is doing worse there than in 2016.  If it is on the _left_ side, he is doing better.
 
-```{r plot, results = TRUE}
+
+```{r plot, results = FALSE, echo = FALSE}
 
 vs_2016 %>% 
   ggplot() +

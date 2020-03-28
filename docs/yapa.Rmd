@@ -52,7 +52,7 @@ plot(days, wt, type = "l", bty = 'n',
 
 # Backtesting
 
-To evaluate this model, we simulate potential election results for 2016 based on 2012 state outcomes and 2016 state polls, and compare those to the actual results.  The plot below displays the predictions and 90% uncertain intervals for Clinton's vote share in each state (x axis) with the actual election results (y axis).  94% of actual results fall within the 90% intervals.  This model would have given Trump a ~30% chance of winning the election, and it would have handled the uncertainty in key battleground states much better than other poll aggregators and forecasters.
+To evaluate this model, we simulate potential election results for 2016 based on 2012 state outcomes and 2016 state polls, and compare those to the actual results.  The plot below displays the predictions and 90% uncertain intervals for Clinton's vote share in each state (x axis) with the actual election results (y axis).  94% of actual results fall within the 90% intervals.  This model would have given Trump a ~30% chance of winning the election, and it would have handled the uncertainty in key battleground states much better than other poll aggregators and forecasters.  Note than uncertainty is wide in some states due to a lack of 2016 polls availabled at realclearpolitics.com, which is where yapa pulls data from.  For example, they have zero polls from Wymoing in 2016, so the model forecast is pure prior.
 
 ```{r plot, include = T}
 library(tidyverse)

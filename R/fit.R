@@ -244,6 +244,29 @@ state_simulations <- data_frame(
 
 save(state_simulations, file = "results/state_simulations")
 
+tmp_state <- vector("list", 51)
+for(s in 1:51) {
+  tmp_state[[s]] <- data_frame(
+    date = Sys.Date() - 1,
+    state = state[s],
+    lower_trump = quantile(em$results[, s, 1], 0.05),
+    mean_trump  = quantile(em$results[, s, 1], 0.5),
+    upper_trump = quantile(em$results[, s, 1], 0.95),
+    lower_biden = quantile(em$results[, s, 2], 0.05),
+    mean_biden  = quantile(em$results[, s, 2], 0.5),
+    upper_biden = quantile(em$results[, s, 2], 0.95)
+  )
+}
+
+state_ts_today <- do.call(rbind, tmp_state)
 
 
+# Append to state tracking data
+state_ts <- read_csv("results/state_ts.csv")
+
+state_ts <- state_ts %>%
+  filter(date != Sys.Date()) %>%
+  rbind(state_ts_today)
+
+write_csv(state_ts, "results/state_ts.csv")
 

@@ -8,3 +8,9 @@ purrr
 dplyr
 stringr
 forcats
+StanHeaders
+rstan
+xml2
+rvest
+Rcpp
+gridExtra
