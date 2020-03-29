@@ -52,6 +52,19 @@ vs_2016 %>%
 ```
 
 
+```{r vs16table}
+prior_results %>% 
+  mutate(`Clinton 2016` = paste0(round(dem*100), "%"), 
+         `Trump 2016`   = paste0(round(rep*100), "%")) %>%
+  select(State = state, `Clinton 2016`, `Trump 2016`) %>%
+  left_join(state_results %>% 
+    select(State, `Biden 2020*` = `Mean Biden`, `Trump 2020*` = `Mean Trump`)) %>%
+  DT::datatable(., options = list(scrollX = TRUE, 
+                             scrollY = "200px",
+                             pageLength = 51))
+```
+
+
 The plot below displays Donald Trump's 2016 vote percentage in each state against average estimates from model simulations of the 2020 election. If a state is on the _right_ side of the line, Trump is doing worse there than in 2016.  If it is on the _left_ side, he is doing better.
 
 

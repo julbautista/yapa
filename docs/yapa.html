@@ -312,7 +312,7 @@ $(document).ready(function () {
 <ol style="list-style-type: decimal">
 <li><strong>Prior</strong>: the results in that state from the previous general election;</li>
 <li><strong>Data</strong>: state-level polls, weighted by recency and sample size;</li>
-<li><strong>Non-sampling error</strong>: we simulate polling error based on its historical distribution, including correlated errors across states.</li>
+<li><strong>Non-sampling error</strong>: we simulate polling error based on its historical distribution, allowing for correlated errors across states.</li>
 </ol>
 <p>Specifically, the number of respondents that support each candidate in each poll <span class="math inline">\(y_{p, c}\)</span> is drawn from the total respondents in that poll <span class="math inline">\(n_p\)</span> at a rate specific to the candidate and the state <span class="math inline">\(\theta_{s, c}\)</span>. The rate parameters are distributed with a candidate-state specific center <span class="math inline">\(\alpha_{c, s}\)</span> and state specific scale <span class="math inline">\(\tau_s\)</span>. The sum of proportions for each candidate must equal one. Finally, to simulate true underlying support, we first sample a vector of <em>biases</em> for each candidate, then sample support based on each state’s rate parameter and the sampled bias. These simulations are repeated tens of thousands of times.</p>
 <p><span class="math display">\[

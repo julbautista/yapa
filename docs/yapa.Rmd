@@ -18,7 +18,7 @@ We model state level support for each presidential candidate with three layers:
 
 1) **Prior**: the results in that state from the previous general election;
 2) **Data**: state-level polls, weighted by recency and sample size;
-3) **Non-sampling error**: we simulate polling error based on its historical distribution, including correlated errors across states.
+3) **Non-sampling error**: we simulate polling error based on its historical distribution, allowing for correlated errors across states.
 
 Specifically, the number of respondents that support each candidate in each poll $y_{p, c}$ is drawn from the total respondents in that poll $n_p$ at a rate specific to the candidate and the state $\theta_{s, c}$.  The rate parameters are distributed with a candidate-state specific center $\alpha_{c, s}$ and state specific scale $\tau_s$.  The sum of proportions for each candidate must equal one.  Finally, to simulate true underlying support, we first sample a vector of *biases* for each candidate, then sample support based on each state's rate parameter and the sampled bias.  These simulations are repeated tens of thousands of times.
 

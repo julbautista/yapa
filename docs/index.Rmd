@@ -220,7 +220,8 @@ for (s in p_biden$state) {
                            & state_ts$date == max(state_ts$date)], 0), '% and ',
                            round(100*state_ts$upper_biden[state_ts$state == s 
                            & state_ts$date == max(state_ts$date)], 0), 
-                           '%.', 'Trump is projected to receive between ',
+                           '% of the vote in ', s, '.  ',
+                           'Trump is projected to receive between ',
                            round(100*state_ts$lower_trump[state_ts$state == s 
                            & state_ts$date == max(state_ts$date)], 0), '% and ',
                            round(100*state_ts$upper_trump[state_ts$state == s 
