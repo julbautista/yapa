@@ -213,8 +213,20 @@ plot_state_ts <- function(s) {
 ```{r statests, results='asis'}
 library(pander)
 for (s in p_biden$state) {
-   pander::pandoc.p('')
    pander::pandoc.header(s, level = 2)
+   pander::pandoc.p('\n')
+   pander::pandoc.p(paste0('Biden is projected to receive between ',
+                           round(100*state_ts$lower_biden[state_ts$state == s 
+                           & state_ts$date == max(state_ts$date)], 0), '% and ',
+                           round(100*state_ts$upper_biden[state_ts$state == s 
+                           & state_ts$date == max(state_ts$date)], 0), 
+                           '%.', 'Trump is projected to receive between ',
+                           round(100*state_ts$lower_trump[state_ts$state == s 
+                           & state_ts$date == max(state_ts$date)], 0), '% and ',
+                           round(100*state_ts$upper_trump[state_ts$state == s 
+                           & state_ts$date == max(state_ts$date)], 0), 
+                           '%.'))
    plot_state_ts(s)
+   pander::pandoc.p('\n')
 }
 ```

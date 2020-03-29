@@ -63,3 +63,29 @@ process_rcp <- function(site, election_day = "2020-11-03", n = Inf) {
   
 }
 
+# Return all state presidential election polls from 538 poll database
+process_538 <- function() {
+  
+  fte <- read_csv("https://projects.fivethirtyeight.com/polls-page/president_polls.csv")
+  
+  dems <- fte %>% 
+    count(answer) %>% 
+    filter(!answer %in% c("Biden", "Trump")) %>%
+    pull(answer)
+  
+  polls <- fte %>%
+    mutate(days_out = as.Date("2020-11-03") - as.Date(end_date,  "%m/%d/%y")) %>%
+    filter(office_type == "U.S. President", !is.na(state)) %>%
+    group_by(question_id, poll_id) %>%
+    mutate(pops = n_distinct(population)) %>% 
+    filter(all(answer %in% c("Biden", "Trump", "Other"))) %>%
+    ungroup() %>% 
+    select(poll_id, question_id, answer, state, pct, sample_size, days_out) %>% 
+    spread(answer, pct) %>%
+    mutate(`Trump (R)` = round(Trump*sample_size/100),
+           `Biden (D)` = round(Biden*sample_size/100),
+           Other = round(sample_size - `Trump (R)` - `Biden (D)`)) %>%
+    select(Sample = sample_size, `Trump (R)`, `Biden (D)`, days_out, Other, state) %>% 
+    na.omit()
+  return(polls)
+}

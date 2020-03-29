@@ -9,23 +9,22 @@ rstan_options(auto_write = TRUE)
 # Results from 2016 (priors) and electoral college votes by state
 prior_results <- read_csv("data/state_results_16.csv")
 
-# Links to real clear politics polls links for each state
-source("data/rcpp_links.R")
-
 # Read polls data from RCP and process 
 source("R/process_polls.R")
-polls_data <- vector('list', length(rcpp_links))
-for(i in 1:length(rcpp_links)) {
-  polls_data[[i]] <- process_rcp(rcpp_links[[i]], n = 10) %>%
-    mutate(state = names(rcpp_links)[i])
-}
-polls <- bind_rows(polls_data) %>%
-  arrange(state)
 
 # Vector of state names (51 = all states + DC)
 state <- prior_results$state
 
-
+# Return all polls from 538, add 0s for states with no polls, so that prior dominates
+polls <- data_frame(state) %>% 
+  left_join(
+    process_538()
+  ) %>% 
+  mutate(Sample = ifelse(is.na(Sample), 0, Sample),
+         `Trump (R)` = ifelse(is.na(`Trump (R)`), 0, `Trump (R)`),
+         `Biden (D)` = ifelse(is.na(`Biden (D)`), 0, `Biden (D)`),
+         Other = ifelse(is.na(Other), 0, Other),
+         days_out = ifelse(is.na(days_out), 365, days_out))
 
 
 # Model data --------------------------------------------------------------
@@ -56,7 +55,7 @@ n_states <- n_distinct(polls$state)
 n_options <- ncol(y)
 
 # Days out from election (for weighting)
-days_out <- polls$days_out
+days_out <- as.numeric(polls$days_out)
 
 # Combine into list
 model_data <- list(n_options = n_options, 
@@ -184,12 +183,12 @@ save(ec_sims, file = "results/ec_sims")
 # Create data frame of results for tracking
 ec_ts_today <- data_frame(
   date = Sys.Date(),
-  lower_trump = quantile(ec_sims[, 1], 0.05),
+  lower_trump = quantile(ec_sims[, 1], 0.1),
   mean_trump = mean(ec_sims[, 1]),
-  upper_trump = quantile(ec_sims[, 1], 0.95),
-  lower_biden = quantile(ec_sims[, 2], 0.05),
+  upper_trump = quantile(ec_sims[, 1], 0.9),
+  lower_biden = quantile(ec_sims[, 2], 0.1),
   mean_biden = mean(ec_sims[, 2]),
-  upper_biden = quantile(ec_sims[, 2], 0.95)
+  upper_biden = quantile(ec_sims[, 2], 0.9)
 )
 
 # Append to tracking data
@@ -247,7 +246,7 @@ save(state_simulations, file = "results/state_simulations")
 tmp_state <- vector("list", 51)
 for(s in 1:51) {
   tmp_state[[s]] <- data_frame(
-    date = Sys.Date() - 1,
+    date = Sys.Date(),
     state = state[s],
     lower_trump = quantile(em$results[, s, 1], 0.05),
     mean_trump  = quantile(em$results[, s, 1], 0.5),
