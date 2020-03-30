@@ -247,7 +247,8 @@ for (s in p_biden$state) {
                            round(100*state_ts$upper_trump[state_ts$state == s 
                            & state_ts$date == max(state_ts$date)], 0), 
                            '%.  In ', dim(state_simulations)[1]/(51*3), 
-                           ' simulations of the election, Biden wins ', pwin, '.'))
+                           ' simulations of the election in ', s, 
+                           ', Biden wins ', pwin, '.'))
    plot_state_ts(s)
    pander::pandoc.p('\n')
 }

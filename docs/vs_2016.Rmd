@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = FALSE, warning = F, message = F, cache = F, fig.ali
 ```{r data}
 library(tidyverse)
 prior_results <- read_csv("../data/state_results_16.csv")
+load("../results/state_results")
 load("../results/results_trump")
 
 vs_2016 <- results_trump %>%
@@ -27,8 +28,8 @@ The table below categorizes states based on how Trump is performing in them rela
 
 ```{r table, results = TRUE}
 vs_2016 %>%
-  mutate(cat = case_when(diff < -0.05 ~ "Worse than 2016",
-                         diff > 0.05 ~ "Better than 2016",
+  mutate(cat = case_when(diff < -0.02 ~ "Worse than 2016",
+                         diff > 0.02 ~ "Better than 2016",
                          TRUE ~ "Close to 2016")) %>%
   group_by(cat) %>%
   arrange(diff) %>%
