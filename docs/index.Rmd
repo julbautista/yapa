@@ -16,19 +16,23 @@ knitr::opts_chunk$set(echo = FALSE, warning = F, message = F, cache = F, fig.ali
 
 ```{r data}
 library(tidyverse)
+
 load("../results/state_results")
 load("../results/state_simulations")
 load("../results/p_biden")
 load("../results/ec_sims")
 load("../results/results_biden")
 load("../results/results_trump")
+
+state_ts <- read_csv("../results/state_ts.csv")
+prior_results <- read_csv("../data/state_results_16.csv")
 ```
 
 _Updated `r format(Sys.Date(), format="%B %dth, %Y")`._
 
-# Who will win the presidency?
+# National
 
-## Current snapshot
+## current snapshot
 
 ```{r topline-ec}
 biden <- round(quantile(ec_sims[, 2], c(0.05, 0.95)))
@@ -64,7 +68,7 @@ data_frame(
 
 ```
 
-## Over time
+## over time
 
 ```{r over time}
 ec_ts <- read_csv("../results/ec_ts.csv")
@@ -101,8 +105,6 @@ ec_ts %>%
 
 
 # Who will win each state?
-
-## Overview
 
 
 ```{r stateresults, results = 'asis'}
@@ -175,7 +177,7 @@ DT::datatable(state_results, options = list(scrollX = TRUE,
 
 
 ```{r state-detail, results = TRUE}
-state_ts <- read_csv("../results/state_ts.csv")
+
 plot_state_ts <- function(s) {
   p <- state_ts %>% 
     filter(state == s) %>% select(-state) %>%
@@ -186,10 +188,13 @@ plot_state_ts <- function(s) {
     ggplot() +
     aes(x = date, y = mean, ymin = lower, ymax = upper,
         col = candidate, fill = candidate) +
-    geom_hline(yintercept = 0.5, lty = 2, col = "black") +
-    geom_line(aes(group = candidate)) +
+    geom_hline(yintercept = prior_results$dem[prior_results$state == s],
+               lty = 9, col = "blue", alpha = 0.7) +
+    geom_hline(yintercept = prior_results$rep[prior_results$state == s],
+               lty = 9, col = "red", alpha = 0.7) +
+    geom_line(aes(group = candidate), lwd = 1) +
     geom_ribbon(col = NA, alpha = 0.3) +
-    scale_x_date(limits = c(as.Date(min(ec_ts$date)), as.Date("2020-11-10")),
+    scale_x_date(limits = c(as.Date(min(state_ts$date)), as.Date("2020-11-10")),
                  date_breaks = "1 month",
                  date_labels =  "%b, %Y") +
     scale_y_continuous(limits = c(0, 1),
@@ -202,9 +207,20 @@ plot_state_ts <- function(s) {
     labs(col = NULL, fill = NULL, y = NULL, x = NULL, title = NULL) +
     theme(panel.grid.minor = element_blank(),
           legend.position = "bottom",
-          plot.title = element_text(size = 15, face = "bold", color = "#007ba7", hjust = 0.5)) +
+          plot.title = element_text(size = 15, face = "bold",
+                                    color = "#007ba7", hjust = 0.5)) +
     guides(col = F, fill = F)
   print(p)
+}
+
+p_win <- function(s, c = "Biden") {
+  oppo <- ifelse(c == "Biden", "Trump", "Biden")
+  res <- state_simulations %>%
+    filter(state == s) %>%
+    summarise(pwin = mean(value[candidate == c] > value[candidate == oppo])) %>%
+    pull(pwin) %>%
+    round(3)
+  res
 }
 
 ```
@@ -213,6 +229,10 @@ plot_state_ts <- function(s) {
 ```{r statests, results='asis'}
 library(pander)
 for (s in p_biden$state) {
+  pwin <- p_win(s, "Biden")
+  pwin <- case_when(pwin < 0.01 ~ "less than 1%",
+                    pwin > 0.99 ~ "more than 99%", 
+                    TRUE ~ paste0(round(pwin*100, 0), "%"))
    pander::pandoc.header(s, level = 2)
    pander::pandoc.p('\n')
    pander::pandoc.p(paste0('Biden is projected to receive between ',
@@ -226,7 +246,8 @@ for (s in p_biden$state) {
                            & state_ts$date == max(state_ts$date)], 0), '% and ',
                            round(100*state_ts$upper_trump[state_ts$state == s 
                            & state_ts$date == max(state_ts$date)], 0), 
-                           '%.'))
+                           '%.  In ', dim(state_simulations)[1]/(51*3), 
+                           ' simulations of the election, Biden wins ', pwin, '.'))
    plot_state_ts(s)
    pander::pandoc.p('\n')
 }

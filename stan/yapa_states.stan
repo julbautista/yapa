@@ -47,14 +47,14 @@ model {
       theta[s][o] ~ student_t(nu, priors[s, o], tau[s]); // prior on proportion
     }
   }
-  tau ~ normal(0.2, 0.01);
+  tau ~ normal(0.1, 0.01);
   nu ~ gamma(2, 0.1);      // Prior on df, from vetari
 }
 generated quantities {
   simplex[n_options] results[n_states];
   vector[n_options] bias;
   for(o in 1:n_options) {
-    bias[o] = normal_rng(100, 5); // Sample a bias
+    bias[o] = normal_rng(100, 3); // Sample a bias
   }
   for(s in 1:n_states) {
     results[s] = dirichlet_rng(bias .* theta[s]); // Simulate an election

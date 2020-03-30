@@ -248,12 +248,12 @@ for(s in 1:51) {
   tmp_state[[s]] <- data_frame(
     date = Sys.Date(),
     state = state[s],
-    lower_trump = quantile(em$results[, s, 1], 0.05),
+    lower_trump = quantile(em$results[, s, 1], 0.1),
     mean_trump  = quantile(em$results[, s, 1], 0.5),
-    upper_trump = quantile(em$results[, s, 1], 0.95),
-    lower_biden = quantile(em$results[, s, 2], 0.05),
+    upper_trump = quantile(em$results[, s, 1], 0.9),
+    lower_biden = quantile(em$results[, s, 2], 0.1),
     mean_biden  = quantile(em$results[, s, 2], 0.5),
-    upper_biden = quantile(em$results[, s, 2], 0.95)
+    upper_biden = quantile(em$results[, s, 2], 0.9)
   )
 }
 
