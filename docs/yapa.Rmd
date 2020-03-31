@@ -20,12 +20,12 @@ We model state level support for each presidential candidate with three layers:
 2) **Data**: state-level polls, weighted by recency and sample size;
 3) **Non-sampling error**: we simulate polling error based on its historical distribution, allowing for correlated errors across states.
 
-Specifically, the number of respondents that support each candidate in each poll $y_{p, c}$ is drawn from the total respondents in that poll $n_p$ at a rate specific to the candidate and the state $\theta_{s, c}$.  The rate parameters are distributed with a candidate-state specific center $\alpha_{c, s}$ and state specific scale $\tau_s$.  The sum of proportions for each candidate must equal one.  Finally, to simulate true underlying support, we first sample a vector of *biases* for each candidate, then sample support based on each state's rate parameter and the sampled bias.  These simulations are repeated tens of thousands of times.
+Specifically, the number of respondents that support each candidate in each poll $y_{p, c}$ is drawn from the total respondents in that poll $n_p$ at a rate specific to the candidate and the state $\theta_{s, c}$.  The rate parameters are distributed with a candidate-state specific center $\alpha_{c, s}$.  The sum of proportions for each candidate must equal one.  Finally, to simulate true underlying support, we first sample a vector of *biases* for each candidate, then sample support based on each state's rate parameter and the sampled bias.  These simulations are repeated tens of thousands of times.
 
 $$
 \begin{align}
 y_{p, c} &\sim Binomial(n_p, \theta_{s, c}) \\
-\theta_{s, c} &\sim Student\_t(\nu, \alpha_{s, c}, \tau_{s}) \\
+\theta_{s, c} &\sim Student\_t(\nu, \alpha_{s, c}, \tau) \\
 \sum_c \theta_s &= 1 
 \end{align}
 $$
@@ -52,9 +52,9 @@ plot(days, wt, type = "l", bty = 'n',
 
 # Backtesting
 
-To evaluate this model, we simulate potential election results for 2016 based on 2012 state outcomes and 2016 state polls, and compare those to the actual results.  The plot below displays the predictions and 90% uncertain intervals for Clinton's vote share in each state (x axis) with the actual election results (y axis).  94% of actual results fall within the 90% intervals.  This model would have given Trump a ~30% chance of winning the election, and it would have handled the uncertainty in key battleground states much better than other poll aggregators and forecasters.  Note than uncertainty is wide in some states due to a lack of 2016 polls availabled at realclearpolitics.com, which is where yapa pulls data from.  For example, they have zero polls from Wymoing in 2016, so the model forecast is pure prior.
+To evaluate this model, we simulated potential election results for 2016 based on 2012 state outcomes and 2016 state polls, and compared those to the election results.  94% of actual results fall within the 90% predictive intervals.  This model would have given Trump a ~30% chance of winning the election, and it would have handled the uncertainty in key battleground states better than many other poll aggregators and forecasters.  
 
-```{r plot, include = T}
+```{r plot, eval = FALSE}
 library(tidyverse)
 load("../results/ppc16")
 
@@ -80,8 +80,7 @@ ppc16 %>%
 
 ```
 
-The table below contains predictions for Clinton's vote share in each state, their lower and upper uncertainty intervals, and the actual result.
-```{r table}
+```{r table, eval = FALSE}
 ppc16 %>%
   select(state, `lower prediction` = lower,
          prediction = mean, `upper prediction` = upper, 
