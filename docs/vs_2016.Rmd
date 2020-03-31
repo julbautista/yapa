@@ -52,6 +52,7 @@ vs_2016 %>%
 
 ```
 
+_* point estimate from 2020 poll aggregations_
 
 ```{r vs16table}
 prior_results %>% 
