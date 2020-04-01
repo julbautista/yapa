@@ -233,6 +233,10 @@ for (s in p_biden$state) {
   pwin <- case_when(pwin < 0.01 ~ "less than 1%",
                     pwin > 0.99 ~ "more than 99%", 
                     TRUE ~ paste0(round(pwin*100, 0), "%"))
+  ptrump <- p_win(s, "Trump")
+  ptrump <- case_when(ptrump < 0.01 ~ "less than 1%",
+                      ptrump > 0.99 ~ "more than 99%", 
+                      TRUE ~ paste0(round(ptrump*100, 0), "%"))
    pander::pandoc.header(s, level = 2)
    pander::pandoc.p('\n')
    pander::pandoc.p(paste0('Biden is projected to receive between ',
@@ -248,7 +252,8 @@ for (s in p_biden$state) {
                            & state_ts$date == max(state_ts$date)], 0), 
                            '%.  In ', dim(state_simulations)[1]/(51*3), 
                            ' simulations of the election in ', s, 
-                           ', Biden wins ', pwin, '.'))
+                           ', Biden wins ', pwin, ' and Trump wins ', 
+                           ptrump, '.'))
    plot_state_ts(s)
    pander::pandoc.p('\n')
 }
