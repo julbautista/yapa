@@ -30,7 +30,7 @@ prior_results <- read_csv("../data/state_results_16.csv")
 
 _Updated `r format(Sys.Date(), format="%B %dth, %Y")`._
 
-# National
+# Who will win the electoral college?
 
 ## current snapshot
 
@@ -39,7 +39,7 @@ biden <- round(quantile(ec_sims[, 2], c(0.05, 0.95)))
 trump <- round(quantile(ec_sims[, 1], c(0.05, 0.95)))
 ```
 
-Biden is projected to win between **`r biden[1]` - `r biden[2]`** electoral college votes.  Trump is projected to win between **`r trump[1]` - `r trump[2]`** electoral college votes.  In `r dim(ec_sims)[1]` simulations of the presidential election from the perspective of `r format(Sys.Date(), format="%B %dth, %Y")`, Biden wins **`r paste0(round(mean(ec_sims[, 2] > ec_sims[, 1])*100), "%")`** and Trump wins **`r paste0(round(mean(ec_sims[, 1] > ec_sims[, 2])*100), "%")`**.
+Biden is projected to win **between `r biden[1]` and `r biden[2]`** electoral college votes.  Trump is projected to win **between `r trump[1]` and `r trump[2]`** electoral college votes.  In `r dim(ec_sims)[1]` simulations of the presidential election from the perspective of `r format(Sys.Date(), format="%B %dth, %Y")`, Biden wins **`r paste0(round(mean(ec_sims[, 2] > ec_sims[, 1])*100), "%")`** and Trump wins **`r paste0(round(mean(ec_sims[, 1] > ec_sims[, 2])*100), "%")`**.
 
 
 ```{r ecplot, results = T, fig.width = 10}
@@ -192,7 +192,7 @@ plot_state_ts <- function(s) {
                lty = 9, col = "blue", alpha = 0.7) +
     geom_hline(yintercept = prior_results$rep[prior_results$state == s],
                lty = 9, col = "red", alpha = 0.7) +
-    geom_line(aes(group = candidate), lwd = 1) +
+    geom_line(aes(group = candidate)) +
     geom_ribbon(col = NA, alpha = 0.3) +
     scale_x_date(limits = c(as.Date(min(state_ts$date)), as.Date("2020-11-10")),
                  date_breaks = "1 month",
