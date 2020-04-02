@@ -119,7 +119,6 @@ state_results <- results_biden %>%
                      `Mean Trump`  = mean) %>%
               select(-cand)) %>%
   rename(State = state) %>%
-  arrange(-`Mean Biden`) %>%
   mutate_if(is.numeric, function(x) paste0(round(x*100), "%"))
 
 save(state_results, file = "results/state_results")
@@ -183,12 +182,12 @@ save(ec_sims, file = "results/ec_sims")
 # Create data frame of results for tracking
 ec_ts_today <- data_frame(
   date = Sys.Date(),
-  lower_trump = quantile(ec_sims[, 1], 0.1),
+  lower_trump = quantile(ec_sims[, 1], 0.05),
   mean_trump = mean(ec_sims[, 1]),
-  upper_trump = quantile(ec_sims[, 1], 0.9),
-  lower_biden = quantile(ec_sims[, 2], 0.1),
+  upper_trump = quantile(ec_sims[, 1], 0.95),
+  lower_biden = quantile(ec_sims[, 2], 0.05),
   mean_biden = mean(ec_sims[, 2]),
-  upper_biden = quantile(ec_sims[, 2], 0.9)
+  upper_biden = quantile(ec_sims[, 2], 0.95)
 )
 
 # Append to tracking data

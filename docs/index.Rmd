@@ -28,18 +28,17 @@ state_ts <- read_csv("../results/state_ts.csv")
 prior_results <- read_csv("../data/state_results_16.csv")
 ```
 
-_Updated `r format(Sys.Date(), format="%B %dth, %Y")`._
+_Updated `r gsub(" 0", " ", format(Sys.Date(), format="%B %d, %Y"))`._
 
 # Who will win the electoral college?
 
-## current snapshot
 
 ```{r topline-ec}
 biden <- round(quantile(ec_sims[, 2], c(0.05, 0.95)))
 trump <- round(quantile(ec_sims[, 1], c(0.05, 0.95)))
 ```
 
-Biden is projected to win **between `r biden[1]` and `r biden[2]`** electoral college votes.  Trump is projected to win **between `r trump[1]` and `r trump[2]`** electoral college votes.  In `r dim(ec_sims)[1]` simulations of the presidential election from the perspective of `r format(Sys.Date(), format="%B %dth, %Y")`, Biden wins **`r paste0(round(mean(ec_sims[, 2] > ec_sims[, 1])*100), "%")`** and Trump wins **`r paste0(round(mean(ec_sims[, 1] > ec_sims[, 2])*100), "%")`**.
+Biden is projected to win **between `r biden[1]` and `r biden[2]`** electoral college votes.  Trump is projected to win **between `r trump[1]` and `r trump[2]`** electoral college votes.  In `r dim(ec_sims)[1]` simulations of the presidential election from the perspective of `r gsub(" 0", " ", format(Sys.Date(), format="%B %d, %Y"))`, Biden wins **`r paste0(round(mean(ec_sims[, 2] > ec_sims[, 1])*100), "%")`** and Trump wins **`r paste0(round(mean(ec_sims[, 1] > ec_sims[, 2])*100), "%")`**.
 
 
 ```{r ecplot, results = T, fig.width = 10}
@@ -64,11 +63,10 @@ data_frame(
         plot.subtitle = element_text(size = 8),
         panel.grid = element_blank(),
         axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 11))
+        axis.text.x = element_text(size = 11)) 
 
 ```
 
-## over time
 
 ```{r over time}
 ec_ts <- read_csv("../results/ec_ts.csv")
@@ -76,29 +74,32 @@ ec_ts <- read_csv("../results/ec_ts.csv")
 ec_ts %>%
   gather(metric, value, -date) %>%
   mutate(candidate = sapply(strsplit(metric, "_"), tail, 1),
+         candidate = ifelse(candidate == "biden", "Biden", "Trump"),
          metric = sapply(strsplit(metric, "_"), head, 1)) %>%
   spread(metric, value) %>%
   ggplot() +
   aes(x = date, y = mean, ymin = lower, ymax = upper,
       col = candidate, fill = candidate) +
+  geom_vline(xintercept = as.Date("2020-11-03"), lty = 2, col = "darkgrey") +
+  geom_hline(yintercept = 270, lty = 2, col = "darkgrey") +
+  geom_hline(yintercept = 304, lty = 9, col = "red", alpha = 0.7) +
+  geom_hline(yintercept = 227, lty = 9, col = "blue", alpha = 0.7) +
   geom_line() +
   geom_ribbon(col = NA, alpha = 0.3) +
   scale_x_date(limits = c(as.Date(min(ec_ts$date)), as.Date("2020-11-10")),
                date_breaks = "1 month",
                date_labels =  "%b, %Y") +
   scale_y_continuous(limits = c(0, 538),
-                     breaks = c(0, 100, 200, 270, 300, 400, 500, 538)) +
-  geom_vline(xintercept = as.Date("2020-11-03"), lty = 2, col = "darkgrey") +
-  geom_hline(yintercept = 270, lty = 2, col = "darkgrey") +
+                     breaks = c(0, 100, 200, 270, 400, 500, 538)) + 
   theme_minimal() +
   scale_color_manual(values = c("blue", "red")) +
   scale_fill_manual(values = c("blue", "red")) +
-  labs(col = NULL, fill = NULL, y = NULL, x = NULL,
-       title = "electoral college votes") +
+  labs(col = NULL, fill = NULL, y = NULL, title = NULL,
+       y = "electoral college votes") +
   theme(panel.grid.minor = element_blank(),
-        legend.position = "bottom",
+        legend.position = "bottom", 
         plot.title = element_text(size = 15, face = "bold", color = "#007ba7", hjust = 0.5)) +
-  guides(col = F)
+  guides(col = F, fill = F)
 
 
 ```
