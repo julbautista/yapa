@@ -15,7 +15,7 @@ source("R/process_polls.R")
 # Vector of state names (51 = all states + DC)
 state <- prior_results$state
 
-# Return all polls from 538, add 0s for states with no polls, so that prior dominates
+# Return all state polls from 538, add 0s for states with no polls, so that prior dominates
 polls <- data_frame(state) %>% 
   left_join(
     process_538()
@@ -26,24 +26,68 @@ polls <- data_frame(state) %>%
          Other = ifelse(is.na(Other), 0, Other),
          days_out = ifelse(is.na(days_out), 365, days_out))
 
+# Return all GE polls from 538, aggregate by week
+polls_ge <- process_538_ge() %>% 
+  group_by(week = cut(end_date, breaks = "week")) %>% 
+  select(-days_out, -end_date) %>% 
+  summarise_all(sum) %>%
+  arrange(week)
+
 
 # Model data --------------------------------------------------------------
 
-# Counts for each option in each poll
+# GE Model
+
+# Counts for each GE week
+y_ge <- polls_ge %>%
+  select(-Sample, -week) %>%
+  as.matrix()
+
+# Total sample for each GE week 
+n_ge <- polls_ge %>%
+  pull(Sample)
+
+# Total weeks
+N_ge <- nrow(polls_ge)
+
+# Number of candidates
+n_options <- ncol(y_ge)
+
+model_data_ge <- list(N_ge = N_ge,
+                      y_ge = y_ge,
+                      n_ge = n_ge,
+                      n_options = n_options)
+
+fit_ge <- stan("stan/yapa_general.stan", data = model_data_ge,
+               chains = 3, iter = 1000)
+efge <- extract(fit_ge)
+
+latest_polls <- colMeans(efge$theta[, N_ge, ])
+latest_polls[1] <- latest_polls[1] + .25*latest_polls[3]
+latest_polls[2] <- latest_polls[2] + .25*latest_polls[3]
+latest_polls[3] <- 0.5*latest_polls[3]
+
+# Counts for each option in each state poll
 y <- polls %>%
   select(-state, -Sample, -days_out) %>%
   as.matrix()
 
-# Total sample in each poll
+# Total sample in each state poll
 n <- polls %>% pull(Sample)
 
-# Number of polls
+# Number of state polls
 N <- nrow(y)
 
 # Prior data
 priors <- prior_results %>%
   select(rep, dem, other) %>%
   as.matrix()
+# Divide state results in 2016 by national results.
+## They will be multiplied by 2020 national polling average 
+## to create adjusted state priors.
+for(i in 1:nrow(priors)) {
+  priors[i, ] <- priors[i, ]*latest_polls/c(0.461, 0.482, 0.057)
+}
 
 # Numeric identifier for each state
 state_id <- match(polls$state, unique(polls$state))
@@ -71,6 +115,7 @@ model_data <- list(n_options = n_options,
 
 
 
+
 # Fit model ---------------------------------------------------------------
 
 m <- stan(file = "stan/yapa_states.stan", data = model_data,
@@ -80,7 +125,10 @@ em <- rstan::extract(m)
 
 
 
-# Visualize ---------------------------------------------------------------
+
+# Results -----------------------------------------------------------------
+
+
 
 # Results
 means_trump <- apply(em$results, 2, function(x) mean(x[, 1]))
@@ -123,33 +171,6 @@ state_results <- results_biden %>%
 
 save(state_results, file = "results/state_results")
 
-
-# Plot
-state_plot <- results_biden %>%
-  ggplot() +
-  aes(x = mean, y = reorder(state, mean),
-      xmin = lower, xmax = upper) +
-  geom_point(col = "blue") +
-  geom_errorbarh(height = 0, col = "blue") +
-  geom_point(data = results_trump, 
-             aes(x = mean, y = state,
-                 xmin = lower, xmax = upper),
-             col = "red") +
-  geom_errorbarh(data = results_trump,
-                 aes(x = mean, y = state,
-                     xmin = lower, xmax = upper), 
-                 height = 0, col = "red") +
-  theme_minimal() +
-  scale_x_continuous(breaks = seq(0, 1, 0.25),
-                     labels = paste0(seq(0, 100, 25), "%")) +
-  labs(x = "vote share", y = NULL,
-       title = "estimated vote share by state",
-       subtitle = paste0("source: state polls via RCP as of ", Sys.Date())) +
-  theme(plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
-        plot.subtitle = element_text(size = 7),
-        axis.text.y = element_text(size = 9))
-
-ggsave("results/state_distributions.png", state_plot, height = 9)
 
 
 
@@ -200,32 +221,6 @@ ec_ts <- ec_ts %>%
 write_csv(ec_ts, "results/ec_ts.csv")
 
 
-# Plot
-ec_plot <- data_frame(
-  electoral_votes = c(ec_sims[, 1], ec_sims[, 2]),
-  candidate = c(rep("Trump", nrow(ec_sims)), rep("Biden", nrow(ec_sims)))
-) %>% 
-  ggplot() +
-  aes(x = electoral_votes, fill = candidate, y = ..density..) +
-  geom_histogram(alpha = 0.7, bins = 538,
-                 position = "identity") +
-  scale_x_continuous(limits = c(0, 538),
-                     breaks = c(seq(0, 538, 100), 270)) +
-  scale_fill_manual(values = c("blue", "red")) +
-  geom_vline(xintercept = 270, lty = 2, col = "black") +
-  theme_minimal() +
-  labs(x = "electoral college votes", y = NULL, fill = NULL,
-       title = "distribution of electoral college votes") +
-  theme(legend.position = "bottom",
-        plot.title = element_text(size = 15, face = "bold", hjust = .5),
-        plot.subtitle = element_text(size = 8),
-        panel.grid = element_blank(),
-        axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 11))
-
-ggsave("results/ec_distributions.png", ec_plot)
-
-
 
 
 # State simulations -------------------------------------------------------
@@ -267,4 +262,3 @@ state_ts <- state_ts %>%
   rbind(state_ts_today)
 
 write_csv(state_ts, "results/state_ts.csv")
-
