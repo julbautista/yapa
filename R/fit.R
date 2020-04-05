@@ -26,46 +26,10 @@ polls <- data_frame(state) %>%
          Other = ifelse(is.na(Other), 0, Other),
          days_out = ifelse(is.na(days_out), 365, days_out))
 
-# Return all GE polls from 538, aggregate by week
-polls_ge <- process_538_ge() %>% 
-  group_by(week = cut(end_date, breaks = "week")) %>% 
-  select(-days_out, -end_date) %>% 
-  summarise_all(sum) %>%
-  arrange(week)
-
 
 # Model data --------------------------------------------------------------
 
-# GE Model
 
-# Counts for each GE week
-y_ge <- polls_ge %>%
-  select(-Sample, -week) %>%
-  as.matrix()
-
-# Total sample for each GE week 
-n_ge <- polls_ge %>%
-  pull(Sample)
-
-# Total weeks
-N_ge <- nrow(polls_ge)
-
-# Number of candidates
-n_options <- ncol(y_ge)
-
-model_data_ge <- list(N_ge = N_ge,
-                      y_ge = y_ge,
-                      n_ge = n_ge,
-                      n_options = n_options)
-
-fit_ge <- stan("stan/yapa_general.stan", data = model_data_ge,
-               chains = 3, iter = 1000)
-efge <- extract(fit_ge)
-
-latest_polls <- colMeans(efge$theta[, N_ge, ])
-latest_polls[1] <- latest_polls[1] + .25*latest_polls[3]
-latest_polls[2] <- latest_polls[2] + .25*latest_polls[3]
-latest_polls[3] <- 0.5*latest_polls[3]
 
 # Counts for each option in each state poll
 y <- polls %>%
@@ -85,9 +49,9 @@ priors <- prior_results %>%
 # Divide state results in 2016 by national results.
 ## They will be multiplied by 2020 national polling average 
 ## to create adjusted state priors.
-for(i in 1:nrow(priors)) {
-  priors[i, ] <- priors[i, ]*latest_polls/c(0.461, 0.482, 0.057)
-}
+#for(i in 1:nrow(priors)) {
+#  priors[i, ] <- priors[i, ]*latest_polls/c(0.461, 0.482, 0.057)
+#}
 
 # Numeric identifier for each state
 state_id <- match(polls$state, unique(polls$state))
