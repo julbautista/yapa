@@ -48,7 +48,7 @@ model {
     }
   }
   tau ~ normal(0.1, 0.01);
-  nu ~ gamma(2, 0.1);      // Prior on df, from vetari
+  nu ~ normal(2, 2);      // Prior on df, from vetari
 }
 generated quantities {
   simplex[n_options] results[n_states];

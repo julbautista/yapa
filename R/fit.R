@@ -45,12 +45,34 @@ N <- nrow(y)
 priors <- prior_results %>%
   select(rep, dem, other) %>%
   as.matrix()
+
 # Divide state results in 2016 by national results.
 ## They will be multiplied by 2020 national polling average 
 ## to create adjusted state priors.
-#for(i in 1:nrow(priors)) {
-#  priors[i, ] <- priors[i, ]*latest_polls/c(0.461, 0.482, 0.057)
-#}
+
+# Return all GE polls from 538, aggregate by week
+ge <- process_538_ge()
+discount <- exp(-as.numeric(ge$days_out)/60)
+total_sample <- sum(ge$Sample*discount)
+
+biden <- sum(ge$`Biden (D)`*discount)
+trump <- sum(ge$`Trump (R)`*discount)
+other <- sum(ge$Other*discount)
+
+latest_polls <- c(
+  trump/total_sample,
+  biden/total_sample,
+  other/total_sample
+)
+
+latest_polls[1] <- latest_polls[1] + .25*latest_polls[3]
+latest_polls[2] <- latest_polls[2] + .25*latest_polls[3]
+latest_polls[3] <- 0.5*latest_polls[3]
+
+adj <- latest_polls/c(0.461, 0.482, 0.057)
+
+priors <- apply(priors, 2, function(x) x*adj)
+priors <- apply(priors, 2, function(x) ifelse(x > 1, 1, x))
 
 # Numeric identifier for each state
 state_id <- match(polls$state, unique(polls$state))

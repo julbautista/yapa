@@ -40,7 +40,7 @@ transformed parameters {
   matrix[n_states, n_options] adj;
   for(o in 1:n_options) {
     for(s in 1:n_states) {
-      adj[s, o] = theta[s][o]/priors[s, o];
+      adj[s, o] = sum(y_/priors[s, o];
     }
   }
 }
