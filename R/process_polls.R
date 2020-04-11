@@ -96,7 +96,20 @@ process_538_ge <- function() {
   
   fte <- read_csv("https://projects.fivethirtyeight.com/polls-page/president_polls.csv") 
   
+  # Prefer LV then RV then V then A
+  pops <- fte %>%
+    count(poll_id, population) %>%
+    left_join(
+      data_frame(population = c("lv", "rv", "v", "a"),
+                 rank = c(1, 2, 3, 4))
+    ) %>%
+    group_by(poll_id) %>%
+    arrange(rank) %>%
+    filter(row_number() == 1) %>%
+    ungroup()
+
   general_election <- fte %>%
+    right_join(pops) %>%
     filter(stage == "general", office_type == "U.S. President", is.na(state)) %>%
     mutate(days_out = as.Date("2020-11-03") - as.Date(end_date,  "%m/%d/%y")) %>%
     group_by(question_id, poll_id) %>%
