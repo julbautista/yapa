@@ -23,6 +23,14 @@ load("../results/p_biden")
 load("../results/ec_sims")
 load("../results/results_biden")
 load("../results/results_trump")
+load("../results/ge_trend")
+# Latest popular vote estimate
+current_rates <- ge_trend %>% filter(day == max(day)) %>% pull(prop)
+popular_vote <- ge_trend %>% 
+  filter(day == max(day)) %>% 
+  mutate(lower = paste0(floor(lower*100), "%"), 
+         upper = paste0(ceiling(upper*100), "%")) %>% 
+  select(candidate, lower, upper)
 
 state_ts <- read_csv("../results/state_ts.csv")
 prior_results <- read_csv("../data/state_results_16.csv")
@@ -98,12 +106,47 @@ ec_ts %>%
        y = "electoral college votes") +
   theme(panel.grid.minor = element_blank(),
         legend.position = "bottom", 
-        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1),
         axis.title.y = element_text(size = 9),
         plot.title = element_text(size = 15, face = "bold", color = "#007ba7", hjust = 0.5)) +
   guides(col = F, fill = F)
 
 
+```
+
+# Who will win the popular vote?
+
+Biden is projected to win **between `r popular_vote$lower[popular_vote$candidate == 'biden']` and `r  popular_vote$upper[popular_vote$candidate == 'biden']`** of the national popular vote.  Trump is projected to win **between `r popular_vote$lower[popular_vote$candidate == 'trump']` and `r  popular_vote$upper[popular_vote$candidate == 'trump']`** of the national popular vote.  In `r dim(pv_sims)[1]` simulations of the popular vote from the perspective of `r gsub(" 0", " ", format(Sys.Date(), format="%B %d, %Y"))`, Biden wins **`r paste0(round(mean(pv_sims[, 2] > pv_sims[, 1])*100), "%")`** and Trump wins **`r paste0(round(mean(pv_sims[, 1] > pv_sims[, 2])*100), "%")`**.
+
+
+
+```{r popularvote}
+ge_trend %>%
+  ggplot() +
+  aes(x = day, y = prop, col = candidate, fill = candidate,
+      ymin = lower, ymax = upper) +
+  geom_vline(xintercept = as.Date("2020-11-03"), lty = 2, col = "darkgrey") +
+  geom_hline(yintercept = 0.461, lty = 9, col = "red", alpha = 0.7) +
+  geom_hline(yintercept = 0.482, lty = 9, col = "blue", alpha = 0.7) +
+  geom_line() +
+  geom_ribbon(col = NA, alpha = 0.3) +
+  scale_color_manual(values = c("blue", "darkgrey", "red")) +
+  scale_fill_manual(values = c("blue", "darkgrey", "red")) +
+  theme_minimal() +
+  scale_x_date(limits = c(as.Date("2019-12-20"), as.Date("2020-11-03")),
+               date_breaks = "1 months",
+               date_labels = "%b, %Y") +
+  scale_y_continuous(limits = c(0, 0.7),
+                     breaks = seq(0, 1, 0.1),
+                     labels = paste0(seq(0, 100, 10), "%")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid.minor = element_blank()) +
+  labs(x = NULL, y = NULL) +
+  guides(col = F, fill = F) +
+  annotate("text", x = max(ge_trend$day), current_rates,
+           label = paste0(round(current_rates*100, 1), "%"),
+           hjust = 0, col = c("red", "blue", "darkgrey"))
+  
 ```
 
 

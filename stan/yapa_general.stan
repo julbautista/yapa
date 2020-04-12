@@ -1,44 +1,46 @@
 // This model is a moving average of poll results.
 
-data {
-  int N_ge;                  // Number of weeks
-  int n_options;             // Number of candidates
-  int n_ge[N_ge];            // Total sample for each week
-  int y_ge[N_ge, n_options]; // Total count for each candidate in each week
-  int Q;
-}
-parameters {
-  simplex[n_options] mu;     // 
-  real<lower = 0> sigma;
-  simplex[n_options] theta[N_ge];
-  vector[Q] lag;
-}
-transformed parameters {
-  matrix[N_ge, n_options] epsilon;
-  for(o in 1:n_options) {
-    for(t in 1:N_ge) {
-      epsilon[t, o] = theta[t, o] - mu[o];
-      for(q in 1:min(t-1, Q)) {
-        epsilon[t, o] = epsilon[t, o] - lag[q]*epsilon[t-q, o];
-      }
+functions {
+  // Helper to convert weighted counts from real to int for binomial model
+  int real_to_int(real x) {
+    int out = 0;
+    while(out < round(x)) {
+      out += 1;
     }
+    return out;
   }
 }
-model {
-  matrix[N_ge, n_options] eta;
+data {
+  int N_ge;                     // Number of polls
+  int n_options;                // Number of candidates
+  matrix[N_ge, n_options] y_ge; // Total count for each candidate in each poll
+  vector[N_ge] days_out_ge;     // Days from election in each poll
+  real<lower = 0> decay_param;
+}
+transformed data {
+  int<lower = 0> y_wt[N_ge, n_options]; // wieghted counts in each poll
+  int n_wt[N_ge];                       // weighted sample
   for(i in 1:N_ge) {
     for(o in 1:n_options) {
-      y_ge[i, o] ~ binomial(n_ge[i], theta[i, o]);
-      eta[i, o] = mu[o];
-      for(q in 1:min(i-1, Q)) {
-        eta[i, o] = eta[i, o] + lag[q]*epsilon[i-q, o];
-      }
-      theta[i, o] ~ normal(mu[o], sigma);
+      y_wt[i, o] = real_to_int(exp(-days_out_ge[i]/decay_param)*(y_ge[i, o]));
+    }
+    n_wt[i] = sum(y_wt[i, ]);
+  } 
+}
+parameters {
+  simplex[n_options] mu; 
+}
+model {
+  for(o in 1:n_options) {
+    for(i in 1:N_ge) {
+      y_wt[i, o] ~ binomial(n_wt[i], mu[o]);  // binomial model
     }
   }
-  mu[1] ~ normal(0.46, 0.05);
-  mu[2] ~ normal(0.48, 0.05);
-  mu[3] ~ normal(0.06, 0.02);
-  lag ~ cauchy(0, 2);
-  sigma ~ cauchy(0, 2);
+  mu[1] ~ normal(0.46, 0.1);
+  mu[2] ~ normal(0.48, 0.1);
+  mu[3] ~ normal(0.06, 0.1);
+}
+generated quantities {
+  simplex[n_options] results;
+  results = dirichlet_rng(500 * mu); // Simulate an election
 }

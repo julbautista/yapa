@@ -73,7 +73,19 @@ process_538 <- function() {
     filter(!answer %in% c("Biden", "Trump")) %>%
     pull(answer)
   
+  pops <- fte %>%
+    count(poll_id, population) %>%
+    left_join(
+      data_frame(population = c("lv", "rv", "v", "a"),
+                 rank = c(1, 2, 3, 4))
+    ) %>%
+    group_by(poll_id) %>%
+    arrange(rank) %>%
+    filter(row_number() == 1) %>%
+    ungroup()
+  
   polls <- fte %>%
+    right_join(pops) %>%
     mutate(days_out = as.Date("2020-11-03") - as.Date(end_date,  "%m/%d/%y")) %>%
     filter(office_type == "U.S. President", !is.na(state)) %>%
     group_by(question_id, poll_id) %>%
