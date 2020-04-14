@@ -16,7 +16,7 @@ Yapa is a simple poll aggregator that estimates state-level support for US presi
 
 We model state level support for each presidential candidate with three layers:
 
-1) **Prior**: the results in that state from the previous general election;
+1) **Prior**: the results in that state from the previous general election, adjusted by partisan swings between previous national election results and current national polls;
 2) **Data**: state-level polls, weighted by recency and sample size;
 3) **Non-sampling error**: we simulate polling error based on its historical distribution, allowing for correlated errors across states.
 
@@ -37,12 +37,12 @@ All code and data are available at [github.com/alexpavlakis/yapa](https://github
 Polls tend to contribute more to final inferences if they have a) larger sample sizes and b) are closer to the election. We discount polls by recency according to the exponential decay model:
 
 $$
-discount_p = e^\frac{-days\_out_p}{60}
+discount_p = e^\frac{-days\_out_p}{\gamma}
 $$
 
 ```{r fig.align='center', echo = F}
 days <- seq(0, 365, 1)
-wt <- exp(-days/60)
+wt <- exp(-days/40)
 
 par(las = 1, mar = c(4, 4, 1, 1))
 plot(days, wt, type = "l", bty = 'n', 

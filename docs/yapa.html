@@ -275,9 +275,6 @@ $(document).ready(function () {
   <a href="index.html">2020</a>
 </li>
 <li>
-  <a href="vs_2016.html">vs 2016</a>
-</li>
-<li>
   <a href="yapa.html">Methodology</a>
 </li>
       </ul>
@@ -302,7 +299,7 @@ $(document).ready(function () {
 <h1>Model</h1>
 <p>We model state level support for each presidential candidate with three layers:</p>
 <ol style="list-style-type: decimal">
-<li><strong>Prior</strong>: the results in that state from the previous general election;</li>
+<li><strong>Prior</strong>: the results in that state from the previous general election, adjusted by partisan swings between previous national election results and current national polls;</li>
 <li><strong>Data</strong>: state-level polls, weighted by recency and sample size;</li>
 <li><strong>Non-sampling error</strong>: we simulate polling error based on its historical distribution, allowing for correlated errors across states.</li>
 </ol>
@@ -319,7 +316,7 @@ y_{p, c} &amp;\sim Binomial(n_p, \theta_{s, c}) \\
 <h2>Weighting</h2>
 <p>Polls tend to contribute more to final inferences if they have a) larger sample sizes and b) are closer to the election. We discount polls by recency according to the exponential decay model:</p>
 <p><span class="math display">\[
-discount_p = e^\frac{-days\_out_p}{60}
+discount_p = e^\frac{-days\_out_p}{\gamma}
 \]</span></p>
 <p><img src="yapa_files/figure-html/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>

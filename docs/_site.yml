@@ -5,8 +5,8 @@ navbar:
   left:
   - text: "2020"
     href: index.html
-  - text: "vs 2016"
-    href: vs_2016.html
+#  - text: "vs 2016"
+#    href: vs_2016.html
   - text: "Methodology"
     href: yapa.html
 output:

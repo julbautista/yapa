@@ -14,3 +14,4 @@ xml2
 rvest
 Rcpp
 gridExtra
+pander

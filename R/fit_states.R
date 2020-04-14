@@ -53,9 +53,9 @@ priors <- prior_results %>%
 load("results/ge_trend")
 latest_polls <- ge_trend %>% filter(day == max(day)) %>% pull(prop)
 
-adj <- latest_polls/c(0.461, 0.482, 0.057)
+adj <- latest_polls - c(0.461, 0.482, 0.057)
 
-priors <- t(apply(priors, 1, function(x) x*adj))
+priors <- t(apply(priors, 1, function(x) x + adj))
 priors <- apply(priors, 2, function(x) ifelse(x > 1, 1, x))
 
 # Numeric identifier for each state
@@ -79,7 +79,7 @@ model_data <- list(n_options = n_options,
                    state_id = state_id,
                    priors = priors,
                    days_out = days_out,
-                   decay_param = 60)
+                   decay_param = 40)
 
 
 
