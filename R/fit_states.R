@@ -32,7 +32,10 @@ polls <- data_frame(state) %>%
 
 # Counts for each option in each state poll
 y <- polls %>%
-  select(-state, -Sample, -days_out) %>%
+  select(`Trump (R)`, `Biden (D)`, Other) %>%
+  mutate(`Trump (R)` = `Trump (R)` + 0.2*Other,
+         `Biden (D)` = `Biden (D)` + 0.2*Other) %>%
+  mutate(Other = 0.6*Other) %>%
   as.matrix()
 
 # Total sample in each state poll
