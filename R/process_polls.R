@@ -106,7 +106,7 @@ process_538 <- function() {
 # Return all national general election polls for Trump and Biden
 process_538_ge <- function() {
   
-  fte <- read_csv("https://projects.fivethirtyeight.com/polls-page/president_polls.csv") 
+  fte <- read_csv("https://projects.fivethirtyeight.com/polls-page/president_polls.csv")
   
   # Prefer LV then RV then V then A
   pops <- fte %>%
