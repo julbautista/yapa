@@ -4,7 +4,7 @@ output:
   html_document:
     theme: cerulean
     toc: true
-    toc_float: false
+    toc_float: true
     toc_depth: 4
 ---
 
