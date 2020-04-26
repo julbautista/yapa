@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, resuts = F,
 ```
 
 
-Yapa is a simple poll aggregator that estimates state-level support for US presidential candidates by combining state-level polls with previous election results.  
+Yapa is a simple poll aggregator that estimates state-level support for US presidential candidates by combining state-level polls with previous election results.  It relies only on polling data and prior election results, not economic or demographic indicators, since any impact these have on results will materialize in polls before the election.  Its strength is appropriate handling of uncertainty.  80% intervals are calibrated to include 80% of results in previous presidential elections.
 
 # Model
 
@@ -18,7 +18,7 @@ We model state level support for each presidential candidate with three layers:
 
 1) **Prior**: the results in that state from the previous general election, adjusted by partisan swings between previous national election results and current national polls;
 2) **Data**: state-level polls, weighted by recency and sample size;
-3) **Non-sampling error**: we simulate polling error based on its historical distribution, allowing for correlated errors across states.
+3) **Non-sampling error**: polling error based on its historical distribution, allowing for correlated errors across states.
 
 Specifically, the number of respondents that support each candidate in each poll $y_{p, c}$ is drawn from the total respondents in that poll $n_p$ at a rate specific to the candidate and the state $\theta_{s, c}$.  The rate parameters are distributed with a candidate-state specific center $\alpha_{c, s}$.  The sum of proportions for each candidate must equal one.  Finally, to simulate true underlying support, we first sample a vector of *biases* for each candidate, then sample support based on each state's rate parameter and the sampled bias.  These simulations are repeated tens of thousands of times.
 
@@ -50,9 +50,6 @@ plot(days, wt, type = "l", bty = 'n',
      main = NULL)
 ```
 
-# Backtesting
-
-To evaluate this model, we simulated potential election results for 2016 based on 2012 state outcomes and 2016 state polls, and compared those to the election results.  94% of actual results fall within the 90% predictive intervals.  This model would have given Trump a ~30% chance of winning the election, and it would have handled the uncertainty in key battleground states better than many other poll aggregators and forecasters.  
 
 ```{r plot, eval = FALSE}
 library(tidyverse)

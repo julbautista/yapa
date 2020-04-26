@@ -54,7 +54,7 @@ generated quantities {
   simplex[n_options] results[n_states];
   vector[n_options] bias;
   for(o in 1:n_options) {
-    bias[o] = normal_rng(100, 3); // Sample a bias (this allow for correlated non-sampling error across states, in line with historic averages)
+    bias[o] = normal_rng(500, 5); // Sample a bias (this allow for correlated non-sampling error across states, in line with historic averages)
   }
   for(s in 1:n_states) {
     results[s] = dirichlet_rng(bias .* theta[s]); // Simulate an election

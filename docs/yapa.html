@@ -294,14 +294,14 @@ $(document).ready(function () {
 </div>
 
 
-<p>Yapa is a simple poll aggregator that estimates state-level support for US presidential candidates by combining state-level polls with previous election results.</p>
+<p>Yapa is a simple poll aggregator that estimates state-level support for US presidential candidates by combining state-level polls with previous election results. It relies only on polling data and prior election results, not economic or demographic indicators, since any impact these have on results will materialize in polls before the election. Its strength is appropriate handling of uncertainty. 80% intervals are calibrated to include 80% of results in previous presidential elections.</p>
 <div id="model" class="section level1">
 <h1>Model</h1>
 <p>We model state level support for each presidential candidate with three layers:</p>
 <ol style="list-style-type: decimal">
 <li><strong>Prior</strong>: the results in that state from the previous general election, adjusted by partisan swings between previous national election results and current national polls;</li>
 <li><strong>Data</strong>: state-level polls, weighted by recency and sample size;</li>
-<li><strong>Non-sampling error</strong>: we simulate polling error based on its historical distribution, allowing for correlated errors across states.</li>
+<li><strong>Non-sampling error</strong>: polling error based on its historical distribution, allowing for correlated errors across states.</li>
 </ol>
 <p>Specifically, the number of respondents that support each candidate in each poll <span class="math inline">\(y_{p, c}\)</span> is drawn from the total respondents in that poll <span class="math inline">\(n_p\)</span> at a rate specific to the candidate and the state <span class="math inline">\(\theta_{s, c}\)</span>. The rate parameters are distributed with a candidate-state specific center <span class="math inline">\(\alpha_{c, s}\)</span>. The sum of proportions for each candidate must equal one. Finally, to simulate true underlying support, we first sample a vector of <em>biases</em> for each candidate, then sample support based on each state’s rate parameter and the sampled bias. These simulations are repeated tens of thousands of times.</p>
 <p><span class="math display">\[
@@ -320,10 +320,6 @@ discount_p = e^\frac{-days\_out_p}{\gamma}
 \]</span></p>
 <p><img src="yapa_files/figure-html/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
-</div>
-<div id="backtesting" class="section level1">
-<h1>Backtesting</h1>
-<p>To evaluate this model, we simulated potential election results for 2016 based on 2012 state outcomes and 2016 state polls, and compared those to the election results. 94% of actual results fall within the 90% predictive intervals. This model would have given Trump a ~30% chance of winning the election, and it would have handled the uncertainty in key battleground states better than many other poll aggregators and forecasters.</p>
 </div>
 
 
