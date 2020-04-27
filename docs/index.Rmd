@@ -85,7 +85,6 @@ ec_ts %>%
          candidate = ifelse(candidate == "biden", "Biden", "Trump"),
          metric = sapply(strsplit(metric, "_"), head, 1)) %>%
   spread(metric, value) %>%
-  filter(date > min_date) %>%
   ggplot() +
   aes(x = date, y = mean, ymin = lower, ymax = upper,
       col = candidate, fill = candidate) +
@@ -95,7 +94,7 @@ ec_ts %>%
   geom_hline(yintercept = 227, lty = 9, col = "blue", alpha = 0.7) +
   geom_line() +
   geom_ribbon(col = NA, alpha = 0.3) +
-  scale_x_date(limits = c(min_date, as.Date("2020-11-10")),
+  scale_x_date(limits = c(as.Date(min(ec_ts$date)), as.Date("2020-11-10")),
                date_breaks = "1 month",
                date_labels =  "%b, %Y") +
   scale_y_continuous(limits = c(0, 538),
@@ -241,7 +240,7 @@ plot_state_ts <- function(s) {
                lty = 9, col = "red", alpha = 0.7) +
     geom_line(aes(group = candidate)) +
     geom_ribbon(col = NA, alpha = 0.3) +
-    scale_x_date(limits = c(min_date, as.Date("2020-11-10")),
+    scale_x_date(limits = c(as.Date(min(state_ts$date)), as.Date("2020-11-10")),
                  date_breaks = "1 month",
                  date_labels =  "%b, %Y") +
     scale_y_continuous(limits = c(0, 1),
