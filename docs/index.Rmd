@@ -180,6 +180,41 @@ p_biden %>%
 
 ```
 
+```{r map, fig.height = 5, fig.width = 8, fig.align = 'center'}
+library(maps)
+library(plotly)
+
+md <- map_data("state")
+
+map_data <- md %>%
+  left_join(p_biden %>%
+              mutate(region = tolower(state))) %>%
+  left_join(prior_results %>%
+              select(state, ev)) %>%
+  mutate(state = paste0(state, " (", ev, ")")) %>%
+  arrange(group, order) %>%
+  select(state, lat, long, p_biden, group)
+
+map_plot <- map_data %>%
+  mutate(p_biden = ifelse(p_biden > 0.99, 0.99, p_biden),
+         p_biden = ifelse(p_biden < 0.01, 0.01, p_biden),
+         `p(biden)` = round(p_biden, 2)) %>%
+  ggplot() +
+  aes(x = long, y = lat, group = group, label = state, fill = `p(biden)`) +
+  geom_polygon(col = 'grey', lwd = 0.2, alpha = 1) +
+  scale_fill_gradient2(low = 'red', mid = 'purple', high = 'blue',
+                       midpoint = 0.5) +
+  guides(fill = F) +
+  labs(title = NULL, x = NULL, y = NULL) +
+  theme_void() +
+  theme(panel.grid = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.line = element_blank(),
+        panel.border = element_blank())
+
+ggplotly(map_plot)
+```
 
 
 ```{r stateplot, results = TRUE, fig.height = 8, fig.align = 'center'}
