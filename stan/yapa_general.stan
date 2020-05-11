@@ -16,6 +16,8 @@ data {
   matrix[N_ge, n_options] y_ge; // Total count for each candidate in each poll
   vector[N_ge] days_out_ge;     // Days from election in each poll
   real<lower = 0> decay_param;
+  matrix[1, n_options] bias;
+  matrix[1, n_options] sd_bias;
 }
 transformed data {
   int<lower = 0> y_wt[N_ge, n_options]; // wieghted counts in each poll
@@ -28,19 +30,17 @@ transformed data {
   } 
 }
 parameters {
+  simplex[n_options] theta;
   simplex[n_options] mu; 
 }
 model {
   for(o in 1:n_options) {
     for(i in 1:N_ge) {
-      y_wt[i, o] ~ binomial(n_wt[i], mu[o]);  // binomial model
+      y_wt[i, o] ~ binomial(n_wt[i], theta[o]);  // binomial model
     }
+    theta[o] ~ normal(mu[o] - bias[1, o], sd_bias[1, o]);
   }
   mu[1] ~ normal(0.46, 0.1);
   mu[2] ~ normal(0.48, 0.1);
   mu[3] ~ normal(0.06, 0.1);
-}
-generated quantities {
-  simplex[n_options] results;
-  results = dirichlet_rng(500 * mu); // Simulate an election
 }

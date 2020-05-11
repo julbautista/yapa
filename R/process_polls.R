@@ -86,18 +86,20 @@ process_538 <- function() {
   
   polls <- fte %>%
     right_join(pops) %>%
-    mutate(days_out = as.Date("2020-11-03") - as.Date(end_date,  "%m/%d/%y")) %>%
+    mutate(end_date = as.Date(end_date,  "%m/%d/%y"),
+           days_out = as.Date("2020-11-03") - end_date) %>%
     filter(office_type == "U.S. President", !is.na(state)) %>%
     group_by(question_id, poll_id) %>%
     mutate(pops = n_distinct(population)) %>% 
     filter(all(answer %in% c("Biden", "Trump", "Other"))) %>%
     ungroup() %>% 
-    select(poll_id, question_id, answer, state, pct, sample_size, days_out) %>% 
+    select(poll_id, question_id, answer, state, pct, sample_size, days_out, end_date) %>% 
     spread(answer, pct) %>%
     mutate(`Trump (R)` = round(Trump*sample_size/100),
            `Biden (D)` = round(Biden*sample_size/100),
            Other = round(sample_size - `Trump (R)` - `Biden (D)`)) %>%
-    select(Sample = sample_size, `Trump (R)`, `Biden (D)`, days_out, Other, state) %>% 
+    select(Sample = sample_size, `Trump (R)`, `Biden (D)`, days_out, Other, 
+           state, end_date) %>% 
     na.omit()
   return(polls)
 }
@@ -123,7 +125,8 @@ process_538_ge <- function() {
   general_election <- fte %>%
     right_join(pops) %>%
     filter(stage == "general", office_type == "U.S. President", is.na(state)) %>%
-    mutate(days_out = as.Date("2020-11-03") - as.Date(end_date,  "%m/%d/%y")) %>%
+    mutate(end_date = as.Date(end_date,  "%m/%d/%y"),
+           days_out = as.Date("2020-11-03") - end_date) %>%
     group_by(question_id, poll_id) %>%
     mutate(pops = n_distinct(population)) %>% 
     filter(all(answer %in% c("Biden", "Trump", "Other"))) %>%
@@ -134,7 +137,6 @@ process_538_ge <- function() {
            `Biden (D)` = round(Biden*sample_size/100),
            Other = round(sample_size - `Trump (R)` - `Biden (D)`)) %>%
     select(Sample = sample_size, `Trump (R)`, `Biden (D)`, days_out, Other, end_date) %>%
-    mutate(end_date = as.Date(end_date, "%m/%d/%y")) %>%
     na.omit() %>%
     arrange(-days_out) 
   
