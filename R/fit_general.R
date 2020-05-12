@@ -15,9 +15,6 @@ polls_ge <- process_538_ge() %>%
 # Counts for each GE week
 y_ge <- polls_ge %>%
   select(`Trump (R)`, `Biden (D)`, Other) %>%
-  #mutate(`Trump (R)` = `Trump (R)` + 0.2*Other,
-  #       `Biden (D)` = `Biden (D)` + 0.2*Other) %>%
-  #mutate(Other = 0.6*Other) %>%
   as.matrix()
 
 

@@ -34,9 +34,6 @@ polls <- data_frame(state) %>%
 # Counts for each option in each state poll
 y <- polls %>%
   select(`Trump (R)`, `Biden (D)`, Other) %>%
-  #mutate(`Trump (R)` = `Trump (R)` + 0.2*Other,
-  #       `Biden (D)` = `Biden (D)` + 0.2*Other) %>%
-  #mutate(Other = 0.6*Other) %>%
   as.matrix()
 
 # Total sample in each state poll
@@ -55,7 +52,7 @@ priors <- prior_results %>%
 ## to create adjusted state priors.
 
 load("results/ge_trend")
-latest_polls <- ge_trend %>% filter(day == max(day)) %>% pull(prop)
+latest_polls <- ge_trend %>% filter(day == exec_date) %>% pull(prop)
 
 adj <- latest_polls - c(0.461, 0.482, 0.057)
 
