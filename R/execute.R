@@ -1,5 +1,5 @@
 # Fit model and render site
-exec_date <- Sys.Date() -1
+exec_date <- Sys.Date()
 
 start <- Sys.time()
 
@@ -11,3 +11,5 @@ rmarkdown::render_site()
 setwd("..")
 
 print(Sys.time() - start)
+
+
