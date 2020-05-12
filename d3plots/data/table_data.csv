@@ -1,0 +1,52 @@
+state,p_biden,cat,rank
+Wyoming,0.005,Likely Trump,14
+West Virginia,0.008,Likely Trump,13
+Oklahoma,0.009,Likely Trump,12
+North Dakota,0.01,Likely Trump,11
+Idaho,0.031,Likely Trump,10
+Kentucky,0.037,Likely Trump,9
+South Dakota,0.04,Likely Trump,8
+Alabama,0.049,Likely Trump,7
+Arkansas,0.057,Likely Trump,6
+Tennessee,0.064,Likely Trump,5
+Nebraska,0.065,Likely Trump,4
+Utah,0.117,Lean Trump,14
+Louisiana,0.126,Lean Trump,13
+Montana,0.133,Lean Trump,12
+Kansas,0.137,Lean Trump,11
+Missouri,0.14,Lean Trump,10
+Mississippi,0.16,Lean Trump,9
+Indiana,0.162,Lean Trump,8
+Alaska,0.208,Lean Trump,7
+South Carolina,0.231,Lean Trump,6
+Texas,0.34,Uncertain,14
+Iowa,0.354,Uncertain,13
+Ohio,0.374,Uncertain,12
+Georgia,0.432,Uncertain,11
+Wisconsin,0.524,Uncertain,10
+Arizona,0.549,Uncertain,9
+New Hampshire,0.564,Uncertain,8
+Minnesota,0.605,Uncertain,7
+Michigan,0.628,Uncertain,6
+Maine,0.633,Uncertain,5
+North Carolina,0.637,Uncertain,4
+Florida,0.683,Uncertain,3
+Virginia,0.684,Uncertain,2
+Pennsylvania,0.686,Uncertain,1
+Nevada,0.698,Uncertain,0
+Colorado,0.751,Lean Biden,14
+New Mexico,0.81,Lean Biden,13
+Delaware,0.824,Lean Biden,12
+Oregon,0.825,Lean Biden,11
+Rhode Island,0.872,Lean Biden,10
+Washington,0.877,Lean Biden,9
+Illinois,0.9,Likely Biden,14
+New Jersey,0.922,Likely Biden,13
+Connecticut,0.927,Likely Biden,12
+Vermont,0.965,Likely Biden,11
+Hawaii,0.983,Likely Biden,10
+Maryland,0.983,Likely Biden,9
+New York,0.986,Likely Biden,8
+Massachusetts,0.993,Likely Biden,7
+California,0.997,Likely Biden,6
+District of Columbia,1,Likely Biden,5

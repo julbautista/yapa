@@ -12,6 +12,8 @@ source("R/process_polls.R")
 polls_ge <- process_538_ge() 
 
 # Counts for each GE week
+# 0.2 and 0.6 due to historical split of “undecided/other” 
+# voters in polls to major party candidates
 y_ge <- polls_ge %>%
   select(`Trump (R)`, `Biden (D)`, Other) %>%
   mutate(`Trump (R)` = `Trump (R)` + 0.2*Other,
