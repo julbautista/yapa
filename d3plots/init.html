@@ -23,11 +23,11 @@ var svg = d3.select("#my_dataviz")
           "translate(" + margin.left + "," + margin.top + ")");
 
 // get the data
-d3.csv("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_doubleHist.csv", function(data) {
+d3.csv("data/hist_data.csv", function(data) {
 
   // X axis: scale and draw:
   var x = d3.scaleLinear()
-      .domain([-4,9])     // can use this instead of 1000 to have the max of data: d3.max(data, function(d) { return +d.price })
+      .domain([0,538])     // can use this instead of 1000 to have the max of data: d3.max(data, function(d) { return +d.price })
       .range([0, width]);
   svg.append("g")
       .attr("transform", "translate(0," + height + ")")
@@ -35,13 +35,13 @@ d3.csv("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/da
 
   // set the parameters for the histogram
   var histogram = d3.histogram()
-      .value(function(d) { return +d.value; })   // I need to give the vector of value
+      .value(function(d) { return +d.electoral_votes; })   // I need to give the vector of value
       .domain(x.domain())  // then the domain of the graphic
-      .thresholds(x.ticks(40)); // then the numbers of bins
+      .thresholds(x.ticks(10)); // then the numbers of bins
 
   // And apply twice this function to data to get the bins.
-  var bins1 = histogram(data.filter( function(d){return d.type === "variable 1"} ));
-  var bins2 = histogram(data.filter( function(d){return d.type === "variable 2"} ));
+  var bins1 = histogram(data.filter( function(d){return d.candidate === "Biden"} ));
+  var bins2 = histogram(data.filter( function(d){return d.candidate === "Trump"} ));
 
   // Y axis: scale and draw:
   var y = d3.scaleLinear()
@@ -77,8 +77,8 @@ d3.csv("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/da
   // Handmade legend
   svg.append("circle").attr("cx",300).attr("cy",30).attr("r", 6).style("fill", "#69b3a2")
   svg.append("circle").attr("cx",300).attr("cy",60).attr("r", 6).style("fill", "#404080")
-  svg.append("text").attr("x", 320).attr("y", 30).text("variable A").style("font-size", "15px").attr("alignment-baseline","middle")
-  svg.append("text").attr("x", 320).attr("y", 60).text("variable B").style("font-size", "15px").attr("alignment-baseline","middle")
+  svg.append("text").attr("x", 320).attr("y", 30).text("Trump").style("font-size", "15px").attr("alignment-baseline","middle")
+  svg.append("text").attr("x", 320).attr("y", 60).text("Biden").style("font-size", "15px").attr("alignment-baseline","middle")
 
 });
 </script>
