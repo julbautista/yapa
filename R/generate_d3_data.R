@@ -6,7 +6,7 @@ load("results/results_biden")
 load("results/results_trump")
 load("results/ge_trend")
 
-
+electoral_votes <- read_csv("data/state_results_16.csv") %>% select(state, ev) %>% rename(State = state)
 
 names(state_results) <- stringr::str_replace(make.names(names(state_results)),"\\.", "_")
 
@@ -17,7 +17,9 @@ state_results %>%
          Upper_Biden = as.numeric(str_remove(Upper_Biden,"%"))/100,
          Lower_Trump = as.numeric(str_remove(Lower_Trump,"%"))/100,
          Mean_Trump = as.numeric(str_remove(Mean_Trump,"%"))/100,
-         Upper_Trump = as.numeric(str_remove(Upper_Trump,"%"))/100)
+         Upper_Trump = as.numeric(str_remove(Upper_Trump,"%"))/100) %>%
+  left_join(electoral_votes) %>%
+  mutate(uncertainty = abs(Mean_Biden - Mean_Trump))
 
 
 list(state_results, state_simulations,
